@@ -1,10 +1,12 @@
-// import type { NextConfig } from "next";
+import type { NextConfig } from "next";
 
-// const nextConfig: NextConfig = {};
-
-// export default nextConfig;
-const nextConfig = {
+const nextConfig: NextConfig = {
   basePath: "/riasec360",
 };
 
-module.exports = nextConfig;
+export default nextConfig;
+// const nextConfig = {
+//   basePath: "/riasec360",
+// };
+
+// module.exports = nextConfig;
