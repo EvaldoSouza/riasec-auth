@@ -6,6 +6,11 @@ datasource db {
 generator client {
   provider = "prisma-client-js"
 }
+
+enum Role{
+  APLICADOR
+  CLIENTE
+}
  
 model User {
   id            String          @id @default(cuid())
@@ -16,6 +21,7 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  role          Role @default(CLIENTE)
   // Optional for WebAuthn support
   Authenticator Authenticator[]
  

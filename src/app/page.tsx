@@ -1,19 +1,28 @@
 import { SignOut } from "@/components/sign-out";
 import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
 
 const Page = async () => {
   const session = await auth();
-  if (!session) redirect("/sign-in");
 
   return (
     <>
-      <div className="bg-gray-100 rounded-lg p-4 text-center mb-6">
-        <p className="text-gray-600">Signed in as:</p>
-        <p className="font-medium">{session.user?.email}</p>
-      </div>
-
-      <SignOut />
+      {session ? (
+        // If the user is signed in, show their info and a sign-out button
+        <>
+          <div className="bg-gray-100 rounded-lg p-4 text-center mb-6">
+            <p className="text-gray-600">Signed in as:</p>
+            <p className="font-medium">{session.user?.email}</p>
+          </div>
+          <SignOut />
+        </>
+      ) : (
+        // If the user is not signed in, show a message
+        <div className="bg-gray-100 rounded-lg p-4 text-center mb-6">
+          <p className="font-medium text-gray-700">
+            You are not signed in. The middleware should have redirected you.
+          </p>
+        </div>
+      )}
     </>
   );
 };

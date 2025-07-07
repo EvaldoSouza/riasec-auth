@@ -1,19 +1,20 @@
+import NextAuth from "next-auth";
 import Github from "next-auth/providers/github";
 import Credentials from "next-auth/providers/credentials";
-import NextAuth from "next-auth";
-import { prisma } from "@/lib/prisma";
 import { PrismaAdapter } from "@auth/prisma-adapter";
+import { prisma } from "@/lib/prisma";
 import { schema } from "./userSchema";
-import { v4 as uuid } from "uuid";
-import { encode as defaultEncode } from "@auth/core/jwt";
-
-const adapter = PrismaAdapter(prisma);
+// 1. Import the Role enum from your generated Prisma Client
+import { Role } from "@prisma/client";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: adapter,
+  adapter: PrismaAdapter(prisma),
+  // 2. Explicitly set the session strategy to "jwt". This is crucial for middleware.
+  session: { strategy: "jwt" },
   providers: [
     Github,
     Credentials({
+      // The authorize function remains mostly the same
       credentials: {
         email: {},
         password: {},
@@ -27,44 +28,32 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             password: validatedCredentials.password,
           },
         });
-        if (!user) {
-          throw new Error("NOP AGAIN");
-        }
 
+        if (!user) {
+          throw new Error("Usuario não cadastrado");
+        }
         return user;
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, account }) {
-      if (account?.provider === "credentials") {
-        token.credentials = true;
+    // 3. The jwt callback is refactored to add the user's ID and role to the token.
+    async jwt({ token, user }) {
+      if (user) {
+        // On sign-in, user object is available.
+        token.id = user.id;
+        token.role = user.role; // Assuming 'user' object from authorize has the role
       }
       return token;
     },
-  },
-  jwt: {
-    encode: async function (params) {
-      if (params.token?.credentials) {
-        const sessionToken = uuid();
-
-        if (!params.token.sub) {
-          throw new Error("No user ID found in token");
-        }
-
-        const createdSession = await adapter?.createSession?.({
-          sessionToken: sessionToken,
-          userId: params.token.sub,
-          expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        });
-
-        if (!createdSession) {
-          throw new Error("Failed to create session");
-        }
-
-        return sessionToken;
+    // 4. A new 'session' callback is added to pass the role to the session object.
+    async session({ session, token }) {
+      if (session.user && token.role) {
+        session.user.id = token.id as string;
+        session.user.role = token.role as Role;
       }
-      return defaultEncode(params);
+      return session;
     },
   },
+
 });
