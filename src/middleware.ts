@@ -20,7 +20,7 @@ export const config = {
      * - favicon.ico (favicon file)
      * - login (the login page)
      */
-    "/",
+    
   ],
 };
 

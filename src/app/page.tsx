@@ -1,30 +1,49 @@
-import { SignOut } from "@/components/sign-out";
+import fs from "fs/promises";
+import path from "path";
 import { auth } from "@/lib/auth";
+import matter from "gray-matter"; // Import gray-matter
+import { HeroSection } from "@/components/home/heroSection";
+import { AboutSection } from "@/components/home/aboutSection";
+import { CategoriesSection } from "@/components/home/categoriesSection";
 
-const Page = async () => {
-  const session = await auth();
+/**
+ * A helper function to read MDX files from the `content` directory.
+ * This keeps the main component cleaner.
+ * @param fileName - The name of the MDX file to read.
+ * @returns The content of the file as a string.
+ */
+async function readMdxFile(fileName: string): Promise<string> {
+  const filePath = path.join(process.cwd(), "content", fileName);
+  return fs.readFile(filePath, "utf8");
+}
 
+console.log("Server is seeing AUTH_URL as:", process.env.AUTH_URL);
+
+// The homepage is a Server Component, so we make it `async`.
+export default async function HomePage() {
+  // 1. Fetch all necessary data at the top of the component.
+  // This happens in parallel on the server for maximum efficiency.
+  const [session, aboutContent] = await Promise.all([
+    auth(),
+    readMdxFile("descricao-teste.mdx"),
+
+  ]);
+
+   // Read the categories file
+  const categoriesFile = await fs.readFile(path.join(process.cwd(), "content", "riasec-categorias.mdx"), "utf8");
+  // Parse the file with gray-matter
+  const { data, content } = matter(categoriesFile);
+
+  // 2. Assemble the page by rendering section components.
+  // Pass the fetched data down as props to the components that need it.
   return (
     <>
-      {session ? (
-        // If the user is signed in, show their info and a sign-out button
-        <>
-          <div className="bg-gray-100 rounded-lg p-4 text-center mb-6">
-            <p className="text-gray-600">Signed in as:</p>
-            <p className="font-medium">{session.user?.email}</p>
-          </div>
-          <SignOut />
-        </>
-      ) : (
-        // If the user is not signed in, show a message
-        <div className="bg-gray-100 rounded-lg p-4 text-center mb-6">
-          <p className="font-medium text-gray-700">
-            You are not signed in. The middleware should have redirected you.
-          </p>
-        </div>
-      )}
+      <HeroSection session={session} />
+      <AboutSection content={aboutContent} />
+      <CategoriesSection categories={data.categories} introContent={content} />
+      {/* You can add more section components here as you build them */}
+      {/* e.g., <HowItWorksSection /> */}
+      {/* e.g., <CallToActionSection /> */}
     </>
   );
-};
-
-export default Page;
+}
