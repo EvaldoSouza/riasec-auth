@@ -8,8 +8,7 @@
 import Link from "next/link";
 import { type Session } from "next-auth";
 // The `signOut` function from next-auth/react is for use in client components.
-// import { signOut } from "next-auth/react";
-import { handleSignOut } from "@/actions/auth";
+import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -66,11 +65,12 @@ export function UserNav({ session }: UserNavProps) {
         <DropdownMenuItem asChild><Link href="/dashboard">Dashboard</Link></DropdownMenuItem>
         <DropdownMenuItem asChild><Link href="/settings">Settings</Link></DropdownMenuItem>
         <DropdownMenuSeparator />
-        <form action={handleSignOut}>
+        {/* <form action={handleSignOut}>
           <button type="submit" className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent focus:bg-accent focus:text-accent-foreground w-full">
             Sign out
           </button>
-        </form>
+        </form> */}
+        <Button onClick={() => signOut()}>Sign Out</Button>
       </DropdownMenuContent>
     </DropdownMenu>
   );

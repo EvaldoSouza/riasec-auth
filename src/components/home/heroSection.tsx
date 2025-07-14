@@ -44,7 +44,7 @@ export function HeroSection({ session }: HeroSectionProps) {
                 <Link href="/testes">Comece o Teste Gratuitamente</Link>
               </Button>
               <Button asChild variant="outline" size="lg">
-                <Link href="/api/auth/signin">Já tenho uma conta</Link>
+                <Link href="/sign-in">Já tenho uma conta</Link>
               </Button>
             </>
           )}

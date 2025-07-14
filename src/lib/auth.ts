@@ -7,7 +7,10 @@ import { schema } from "./userSchema";
 // 1. Import the Role enum from your generated Prisma Client
 import { Role } from "@prisma/client";
 
+const basePath = process.env.BASE_PATH ?? ''
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  basePath: `${basePath}/api/auth`,
   adapter: PrismaAdapter(prisma),
   // 2. Explicitly set the session strategy to "jwt". This is crucial for middleware.
   session: { strategy: "jwt" },
