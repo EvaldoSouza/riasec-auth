@@ -1,34 +1,178 @@
+// schema.prisma
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
- 
+
 generator client {
   provider = "prisma-client-js"
 }
 
-enum Role{
+enum Role {
   APLICADOR
   CLIENTE
 }
- 
+
+enum ApplicationStatus {
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NOT_STARTED
+}
+
+// --- CORE ENTITIES ---
+
 model User {
-  id            String          @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String?
-  email         String          @unique
+  email         String    @unique
   emailVerified DateTime?
   password      String?
   image         String?
-  accounts      Account[]
-  sessions      Session[]
-  role          Role @default(CLIENTE)
-  // Optional for WebAuthn support
+  role          Role      @default(CLIENTE)
+  dateOfBirth   DateTime? @map("date_of_birth")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  accounts     Account[]
+  sessions     Session[]
   Authenticator Authenticator[]
- 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  groups       UserGroup[]
+  applications UserApplication[]
+
+  @@map("users")
 }
- 
+
+model Group {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  createdAt   DateTime  @default(now())
+
+  // Relations
+  members      UserGroup[]
+  applications Application[]
+
+  @@map("groups")
+}
+
+model Test {
+  id          String    @id @default(cuid())
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  cards        TestCard[]
+  applications Application[]
+
+  @@map("tests")
+}
+
+model Card {
+  id         String   @id @default(cuid())
+  question   String
+  riasecType String
+  inUse      Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  // Relations
+  tests   TestCard[]
+  answers Answer[] // A card can have many answers across all applications
+
+  @@map("cards")
+}
+
+model Application {
+  id                String    @id @default(cuid())
+  location          String?
+  scheduledDateTime DateTime  @map("scheduled_date_time")
+  startTime         DateTime? @map("start_time")
+  endTime           DateTime? @map("end_time")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relations
+  testId String
+  test   Test @relation(fields: [testId], references: [id], onDelete: Restrict)
+
+  groupId String?
+  group   Group? @relation(fields: [groupId], references: [id], onDelete: SetNull)
+
+  participants UserApplication[]
+
+  @@map("applications")
+}
+
+// Represents a single answer given by a user to a card within an application.
+model Answer {
+  id String @id @default(cuid())
+
+  competenceResponse String?
+  affinityResponse   String?
+
+  // Relation to the card being answered
+  cardId String
+  card   Card @relation(fields: [cardId], references: [id], onDelete: Restrict)
+
+  // Relation back to the specific user's participation in an application
+  userApplicationUserId       String
+  userApplicationApplicationId String
+  userApplication             UserApplication @relation(fields: [userApplicationUserId, userApplicationApplicationId], references: [userId, applicationId], onDelete: Cascade)
+
+  @@map("answers")
+}
+
+
+// --- MANY-TO-MANY LINKING TABLES ---
+
+model UserGroup {
+  userId  String
+  groupId String
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@id([userId, groupId])
+  @@map("user_groups")
+}
+
+model TestCard {
+  testId String
+  cardId String
+
+  test Test @relation(fields: [testId], references: [id], onDelete: Cascade)
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@id([testId, cardId])
+  @@map("test_cards")
+}
+
+// Links a User to a specific Application they are participating in.
+model UserApplication {
+  userId        String
+  applicationId String
+
+  testStartedAt  DateTime? @map("test_started_at")
+  testFinishedAt DateTime? @map("test_finished_at")
+
+  // Relations
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  answers Answer[] // A user's participation is composed of many answers
+
+  status    ApplicationStatus @default(NOT_STARTED)
+
+  @@id([userId, applicationId])
+  @@map("user_applications")
+}
+
+
+// --- AUTH.JS MODELS ---
+
 model Account {
   userId            String
   type              String
@@ -41,34 +185,34 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
- 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
- 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@id([provider, providerAccountId])
+  @@map("accounts")
 }
- 
+
 model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("sessions")
 }
- 
+
 model VerificationToken {
   identifier String
   token      String
   expires    DateTime
- 
+
   @@id([identifier, token])
+  @@map("verification_tokens")
 }
- 
-// Optional for WebAuthn support
+
 model Authenticator {
   credentialID         String  @unique
   userId               String
@@ -78,8 +222,8 @@ model Authenticator {
   credentialDeviceType String
   credentialBackedUp   Boolean
   transports           String?
- 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+  user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@id([userId, credentialID])
+  @@map("authenticators")
 }

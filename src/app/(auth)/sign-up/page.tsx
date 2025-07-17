@@ -35,7 +35,11 @@ const Page = async () => {
           const res = await signUp(formData);
           if (res.success) {
             redirect("/sign-in");
+          }else{
+            console.log(res)
           }
+            
+          
         }}
       >
         <Input

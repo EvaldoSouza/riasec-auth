@@ -17,8 +17,6 @@ async function readMdxFile(fileName: string): Promise<string> {
   return fs.readFile(filePath, "utf8");
 }
 
-console.log("Server is seeing AUTH_URL as:", process.env.AUTH_URL);
-
 // The homepage is a Server Component, so we make it `async`.
 export default async function HomePage() {
   // 1. Fetch all necessary data at the top of the component.

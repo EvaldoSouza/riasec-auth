@@ -4,6 +4,7 @@ import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import { schema } from "./userSchema";
+import bcrypt from "bcryptjs";
 // 1. Import the Role enum from your generated Prisma Client
 import { Role } from "@prisma/client";
 
@@ -17,25 +18,31 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Github,
     Credentials({
-      // The authorize function remains mostly the same
-      credentials: {
-        email: {},
-        password: {},
-      },
-      authorize: async (credentials) => {
-        const validatedCredentials = schema.parse(credentials);
+      async authorize(credentials) {
+        // 2. Use the imported schema for validation.
+        const validatedFields = schema.safeParse(credentials);
 
-        const user = await prisma.user.findFirst({
-          where: {
-            email: validatedCredentials.email,
-            password: validatedCredentials.password,
-          },
-        });
+        if (validatedFields.success) {
+          const { email, password } = validatedFields.data;
+          
+          const user = await prisma.user.findUnique({
+            where: { email: email.toLocaleLowerCase() },
+          });
 
-        if (!user) {
-          throw new Error("Usuario não cadastrado");
+          if (!user || !user.password) {
+            // If the user doesn't exist or signed up with an OAuth provider, fail login.
+            return null;
+          }
+
+          const passwordsMatch = await bcrypt.compare(
+            password,
+            user.password
+          );
+
+          if (passwordsMatch) return user;
         }
-        return user;
+
+        return null;
       },
     }),
   ],
