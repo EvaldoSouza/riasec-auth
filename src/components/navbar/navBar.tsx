@@ -9,7 +9,7 @@ import { UserNav } from "./userNav"; // Importing a dedicated Client Component f
 const getNavLinksForRole = (role?: 'aplicador' | 'cliente' | string) => {
   // These links are visible to everyone, including logged-out users.
   const baseLinks = [
-    { href: "/", label: "Home" },
+    { href: "/", label: "Inicio" },
   ];
 
   // The 'switch' statement is a very clear way to handle role-based logic.
@@ -18,23 +18,23 @@ const getNavLinksForRole = (role?: 'aplicador' | 'cliente' | string) => {
     case "aplicador":
       return [
         ...baseLinks,
-        { href: "/admin/dashboard", label: "Admin Dashboard" },
-        { href: "/admin/users", label: "Manage Users" },
+        { href: "/admin/dashboard", label: "Painel" },
+        { href: "/admin/users", label: "Clientes" },
       ];
 
     // For the 'cliente' role [cite: 95]
     case "cliente":
       return [
         ...baseLinks,
-        { href: "/dashboard", label: "My Dashboard" },
-        { href: "/dashboard/results", label: "My Results" },
+        { href: "/dashboard", label: "Painel" },
+        { href: "/dashboard/results", label: "Resultados" },
       ];
 
     // Default case for logged-out users.
     default:
       return [
         ...baseLinks,
-        { href: "/about", label: "About" },
+        { href: "/about", label: "Sobre" },
       ];
   }
 };

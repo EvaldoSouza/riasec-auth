@@ -30,7 +30,7 @@ export function UserNav({ session }: UserNavProps) {
   if (!session?.user) {
     return (
       <Link href="/sign-in">
-        <Button variant="outline">Sign In</Button>
+        <Button variant="outline">Entrar</Button>
       </Link>
     );
   }
@@ -62,15 +62,15 @@ export function UserNav({ session }: UserNavProps) {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild><Link href="/dashboard">Dashboard</Link></DropdownMenuItem>
-        <DropdownMenuItem asChild><Link href="/settings">Settings</Link></DropdownMenuItem>
+        <DropdownMenuItem asChild><Link href="/dashboard">Painel</Link></DropdownMenuItem>
+        <DropdownMenuItem asChild><Link href="/settings">Configurações</Link></DropdownMenuItem>
         <DropdownMenuSeparator />
         {/* <form action={handleSignOut}>
           <button type="submit" className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent focus:bg-accent focus:text-accent-foreground w-full">
             Sign out
           </button>
         </form> */}
-        <Button onClick={() => signOut()}>Sign Out</Button>
+        <Button onClick={() => signOut()}>Sair</Button>
       </DropdownMenuContent>
     </DropdownMenu>
   );
