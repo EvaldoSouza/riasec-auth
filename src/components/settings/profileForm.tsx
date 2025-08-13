@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { updateProfile } from "@/services/userSettings";
 import { Input } from "@/components/ui/input";
@@ -10,34 +10,44 @@ import { User } from "@prisma/client";
 // Define the state type, matching the server action's return type.
 type FormState = { error?: string; success?: string; newName?: string; } | null;
 
-export function ProfileForm({ user }: { user: User }) {
-  const { update } = useSession();
+export function ProfileForm() {
+  const { data:session, update } = useSession();
   
   // 1. Use standard useState for state management.
   const [state, setState] = useState<FormState>(null);
   const [isPending, setIsPending] = useState(false);
-  const [name, setName] = useState(user.name ?? '');
+  const [name, setName] = useState(session?.user?.name ?? '');
 
+  // This effect syncs the form field if the session changes from an external source.
+  useEffect(() => {
+    if (session?.user?.name) {
+      setName(session.user.name);
+    }
+  }, [session?.user?.name]); // Dependency is the name from the session
   // 2. Create an explicit onSubmit handler function.
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsPending(true);
-    setState(null); // Reset previous state
+    setState(null);
 
     const formData = new FormData(event.currentTarget);
     
-    // 3. Call the server action directly.
-    const result = await updateProfile(formData);
+    try {
+      const result = await updateProfile(formData);
     
-    // 4. If the database update was successful, then update the session.
-    if (result.success && result.newName) {
-      // This ensures the session update only happens once, after a successful action.
-      await update({ name: result.newName });
-    }
+      if (result.success && result.newName) {
+        await update({ name: result.newName });
+      }
 
-    // 5. Update the UI with the final result and end the pending state.
-    setState(result);
-    setIsPending(false);
+      setState(result);
+    } catch (error) {
+      // Catch any unexpected errors from the action or session update
+      console.error("An unexpected error occurred in handleSubmit:", error);
+      setState({ error: "A critical error occurred. Please try again." });
+    } finally {
+      // This will run no matter what, ensuring the button is always re-enabled.
+      setIsPending(false);
+    }
   };
 
   return (
@@ -49,7 +59,7 @@ export function ProfileForm({ user }: { user: User }) {
       </div>
       <div className="space-y-2">
         <label className="text-sm font-medium">Email</label>
-        <Input type="email" value={user.email ?? ''} disabled className="cursor-not-allowed bg-muted" />
+        <Input type="email" value={session?.user.email ?? ''} disabled className="cursor-not-allowed bg-muted" />
       </div>
 
       <Button type="submit" disabled={isPending}>{isPending ? "Saving..." : "Save Changes"}</Button>

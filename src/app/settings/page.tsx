@@ -26,11 +26,11 @@ export default async function SettingsPage() {
       
       <Card>
         <CardHeader>
-          <CardTitle>Profile</CardTitle>
-          <CardDescription>Manage your personal information.</CardDescription>
+          <CardTitle>Perfil</CardTitle>
+          <CardDescription>Gerencie suas informações pessoais.</CardDescription>
         </CardHeader>
         <CardContent>
-          <ProfileForm user={user} />
+          <ProfileForm/>
         </CardContent>
       </Card>
       
@@ -40,7 +40,7 @@ export default async function SettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Change Password</CardTitle>
-            <CardDescription>Update your password here. This is only available if you signed up with an email and password.</CardDescription>
+            <CardDescription>Atualize sua senha aqui.</CardDescription>
           </CardHeader>
           <CardContent>
             <PasswordForm />

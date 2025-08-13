@@ -23,16 +23,23 @@ const PasswordSchema = z.object({
     path: ["newPassword"],
 })
 
+//Update the profile in database
 export async function updateProfile(formData: FormData): Promise<ProfileFormState> {
   const session = await auth();
   if (!session?.user?.id) return { error: "Not authenticated." };
 
-  // ... the rest of the function logic is exactly the same ...
   const validatedFields = ProfileSchema.safeParse({ name: formData.get('name') });
-  if (!validatedFields.success) { /* ... */ }
+
+  if (!validatedFields.success) { 
+    console.log("Nome não validado com sucesso")
+    return { error: validatedFields.error.flatten().fieldErrors.name?.[0] ?? "Invalid name." };
+  }
+
   const { name } = validatedFields.data;
+  
   try {
     await prisma.user.update({ where: { id: session.user.id }, data: { name } });
+    
     revalidatePath("/settings");
     return { success: "Profile updated successfully!", newName: name };
   } catch (error) {
