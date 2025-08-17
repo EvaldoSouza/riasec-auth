@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { updateProfile } from "@/services/userSettings";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { User } from "@prisma/client";
+
 
 // Define the state type, matching the server action's return type.
 type FormState = { error?: string; success?: string; newName?: string; } | null;

@@ -1,4 +1,5 @@
 // All necessary imports are at the top.
+"use server";
 import Link from "next/link";
 import { auth } from "@/lib/auth"; // The server-side Auth.js helper
 import { UserNav } from "./userNav"; // Importing a dedicated Client Component for interactivity
@@ -15,15 +16,18 @@ const getNavLinksForRole = (role?: 'aplicador' | 'cliente' | string) => {
   // The 'switch' statement is a very clear way to handle role-based logic.
   switch (role) {
     // For the 'aplicador' role [cite: 95]
-    case "aplicador":
+    case "APLICADOR":
       return [
         ...baseLinks,
-        { href: "/admin/dashboard", label: "Painel" },
-        { href: "/admin/users", label: "Clientes" },
+        { href: "/admin", label: "Painel" },
+        { href: "/admin/users", label: "Usuários" },
+        { href: "/admin/applications", label: "Aplicações" },
+        { href: "/admin/tests", label: "Testes" },
+        { href: "/admin/cards", label: "Cartões" },
       ];
 
     // For the 'cliente' role [cite: 95]
-    case "cliente":
+    case "CLIENTE":
       return [
         ...baseLinks,
         { href: "/dashboard", label: "Painel" },
