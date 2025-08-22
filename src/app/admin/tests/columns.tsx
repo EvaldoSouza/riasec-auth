@@ -1,15 +1,25 @@
-"use client"; // Needs to be a client component for the interactive parts like DropdownMenu
+"use client";
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Test } from "@prisma/client";
-import { format } from "date-fns";
-import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
 import Link from "next/link";
+import { MoreHorizontal, ArrowUpDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+// 1. Import the new dialog component.
+import { DeleteTestDialog } from "./deleteTestDialog";
 
-// This is where you would define your row actions (Edit, Delete, etc.)
-function DataTableRowActions({ testId }: { testId: string }) {
+/**
+ * A self-contained component for rendering the actions dropdown for each row.
+ */
+function DataTableRowActions({ test }: { test: Test }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -19,11 +29,27 @@ function DataTableRowActions({ testId }: { testId: string }) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuLabel>Ações</DropdownMenuLabel>
         <DropdownMenuItem asChild>
-          <Link href={`/admin/tests/edit/${testId}`}>Edit Test</Link>
+          <Link href={`/admin/tests/edit/${test.id}`}>Editar Teste</Link>
         </DropdownMenuItem>
-        <DropdownMenuItem>View Submissions</DropdownMenuItem>
+        <DropdownMenuItem>Ver Aplicações</DropdownMenuItem>
+        <DropdownMenuSeparator />
+
+        {/* --- THIS IS THE INTEGRATION --- */}
+        {/* 2. We wrap the trigger (the DropdownMenuItem) with our dialog component. */}
+        <DeleteTestDialog testId={test.id}>
+          {/* 3. The `onSelect` prop prevents the dropdown from closing when this item is clicked,
+              allowing the confirmation dialog to open smoothly. */}
+          <DropdownMenuItem
+            onSelect={(e) => e.preventDefault()}
+            className="text-destructive focus:bg-destructive/10"
+          >
+            Deletar Teste
+          </DropdownMenuItem>
+        </DeleteTestDialog>
+        {/* --- END INTEGRATION --- */}
+        
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -41,17 +67,28 @@ export const columns: ColumnDef<Test>[] = [
   },
   {
     accessorKey: "createdAt",
-    header: "Criado Em",
+    header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Criado Em
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        );
+      },
     cell: ({ row }) => {
+      // Assuming you have date-fns installed
+      // import { format } from "date-fns";
       const date = row.getValue<Date>("createdAt");
-      return <div className="text-left font-medium">{format(date, "dd/MM/yyyy")}</div>;
+      return <div className="text-left font-medium">{new Date(date).toLocaleDateString('pt-BR')}</div>;
     },
   },
   {
     id: "actions",
     cell: ({ row }) => {
-      const test = row.original;
-      return <DataTableRowActions testId={test.id} />;
+      return <DataTableRowActions test={row.original} />;
     },
   },
 ];

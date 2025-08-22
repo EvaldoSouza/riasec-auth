@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { auth } from '@/lib/auth';
 import { getAllCards } from '@/services/cardService'; // Create this service function
 import { columns } from './columns';
-import { CardList } from './card-list';
+import { CardList } from './cardList';
 import { Button } from '@/components/ui/button';
 import { redirect } from 'next/navigation';
 

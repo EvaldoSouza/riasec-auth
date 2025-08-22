@@ -31,11 +31,11 @@ export const columns: ColumnDef<Card>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "pergunta",
+    accessorKey: "question",
     header: "Pergunta",
   },
   {
-    accessorKey: "tipo",
+    accessorKey: "riasecType",
     // 2. Add an interactive, sortable header.
     header: ({ column }) => {
       return (
@@ -50,11 +50,11 @@ export const columns: ColumnDef<Card>[] = [
     },
   },
   {
-    accessorKey: "em_uso",
+    accessorKey: "inUse",
     header: "Em Uso",
     // 3. Use a custom cell renderer to display a user-friendly badge.
     cell: ({ row }) => {
-      const emUso = row.getValue("em_uso");
+      const emUso = row.getValue("inUse");
       return emUso ? (
         <Badge variant="destructive">Sim</Badge>
       ) : (

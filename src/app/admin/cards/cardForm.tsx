@@ -1,11 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { Card } from "@prisma/client";
-import { createCard, updateCard } from "@/actions/cardActions";
+import { createCard, updateCard, ActionState } from "@/actions/cardActions";
 import {
   Form,
   FormControl,
@@ -23,10 +24,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-//import { useToast } from "@/components/ui/use-toast";
 import { toast } from "sonner";
 
-// 1. Define and export the enum and schema for reusability and clarity.
+// 1. A single, reusable Zod schema defines the validation rules for the form.
 const riasecTypes = z.enum([
   "Realista",
   "Investigativo",
@@ -41,7 +41,8 @@ const formSchema = z.object({
   tipo: riasecTypes,
 });
 
-// 2. Define the component's props. The optional `card` prop is key to its reusability.
+// 2. The component accepts an optional `card` prop. Its presence determines
+//    if the form is for editing an existing card or creating a new one.
 interface CardFormProps {
   card?: Card;
 }
@@ -50,7 +51,9 @@ export function CardForm({ card }: CardFormProps) {
   const router = useRouter();
   const isEditMode = !!card;
 
-  // 3. Safely parse the initial 'tipo' from the database to prevent type errors.
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Safely parse the initial `tipo` from the database to prevent type errors.
   const validatedInitialTipo = riasecTypes.safeParse(card?.riasecType);
   const initialTipo = validatedInitialTipo.success ? validatedInitialTipo.data : undefined;
 
@@ -62,37 +65,36 @@ export function CardForm({ card }: CardFormProps) {
     },
   });
 
-  const { isSubmitting } = form.formState;
-
-  // 4. The onSubmit handler determines which server action to call.
+  // 3. An explicit onSubmit handler gives us full control over the submission flow.
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true); // 1. Set pending state
-
-    const formData = new FormData();
-    formData.append('pergunta', values.pergunta);
-    formData.append('tipo', values.tipo);
+    setIsSubmitting(true);
     
-    let result: ActionState | null = null;
-    
-    if (isEditMode) {
-      formData.append('id_cartao', card.id_cartao);
-      // 2. Call the server action directly.
-      result = await updateCard(formData);
-    } else {
-      // For create, we can still use the redirecting action.
-      // (Or refactor it to return a state object too for consistency).
-      await createCard(null, formData);
-      // createCard redirects, so the code below won't run in that case.
-    }
+    try {
+      const formData = new FormData();
+      formData.append('pergunta', values.pergunta);
+      formData.append('tipo', values.tipo);
 
-    setIsSubmitting(false); // 3. Unset pending state
+      let result: ActionState | null = null;
+      
+      if (isEditMode) {
+        formData.append('id_cartao', card.id);
+        result = await updateCard(null, formData);
+      } else {
+        result = await createCard(null, formData);
+      }
 
-    // 4. Handle the result from the action.
-    if (result?.status === 'success') {
-      toast({ title: "Sucesso!", description: result.message });
-      router.push('/admin/cards');
-    } else if (result?.status === 'error') {
-      toast({ variant: "destructive", title: "Erro", description: result.message });
+      if (result?.status === 'success') {
+        toast("Sucesso");
+        router.push('/admin/cards');
+      } else if (result?.status === 'error') {
+        const error_message = "Erro " + result.message
+        toast(error_message);
+      }
+    } catch (error) {
+      console.log(error)
+      toast("Erro inesperado ao submeter o formulário do cartão");
+    } finally {
+      setIsSubmitting(false);
     }
   }
 

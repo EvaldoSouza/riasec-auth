@@ -75,7 +75,7 @@ model Card {
   id         String   @id @default(cuid())
   question   String
   riasecType String
-  inUse      Boolean  @default(true)
+  inUse      Boolean  @default(false)
   createdAt  DateTime @default(now())
 
   // Relations

@@ -7,9 +7,9 @@ import { columns } from "./columns";
 import { DataTable } from "@/components/ui/data-table"; // Our reusable DataTable
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { createTest } from "@/services/testService";
 import { Card } from "@prisma/client";
 import { useFormStatus } from "react-dom";
+import { createTest } from "@/actions/testActions";
 
 // This is a helper component for the submit button's pending state
 function SubmitButton() {
@@ -68,7 +68,9 @@ export function CreateTestForm({ cards }: { cards: Card[] }) {
         <SubmitButton />
       </div>
       
-      {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
+      {state?.status === 'error' && (
+        <p className="text-sm text-destructive">{state.message}</p>
+      )}
     </form>
   );
 }
