@@ -16,6 +16,13 @@ const deleteTestSchema = z.object({
   testId: z.string().cuid({ message: "ID do teste inválido." }),
 });
 
+const updateTestSchema = z.object({
+  testId: z.string().cuid({ message: "ID do teste inválido." }),
+  description: z.string().min(3, { message: "A descrição deve ter pelo menos 3 caracteres." }),
+  // cardIds can be an empty string if the user deselects all cards.
+  cardIds: z.string().optional(),
+});
+
 
 export async function createTest(
   previousState: ActionState | null,
@@ -162,4 +169,105 @@ export async function deleteTest(
     return { status: "error", message: "Falha ao excluir o teste. Por favor, tente novamente." };
   
   }
+}
+
+/**
+ * A Server Action to update an existing Test. It handles changes to the
+ * description and the set of associated cards within a single transaction.
+ */
+export async function updateTest(
+  previousState: ActionState | null,
+  formData: FormData
+): Promise<ActionState> {
+  const session = await auth();
+  if (session?.user?.role !== 'APLICADOR') {
+    return { status: "error", message: "Não autorizado." };
+  }
+
+  const validatedFields = updateTestSchema.safeParse(Object.fromEntries(formData));
+  if (!validatedFields.success) {
+    return { status: "error", message: "Dados do formulário inválidos." };
+  }
+  
+  const { testId, description } = validatedFields.data;
+  const newCardIds = new Set(validatedFields.data.cardIds?.split(',').filter(id => id) ?? []);
+
+  try {
+    // 3. Start a database transaction to ensure all or nothing is updated.
+    await prisma.$transaction(async (tx) => {
+
+      // --- Step A: Calculate the difference in cards ---
+
+      // Get the current set of cards for this test from the database.
+      const currentTestCards = await tx.testCard.findMany({
+        where: { testId: testId },
+        select: { cardId: true },
+      });
+      const currentCardIds = new Set(currentTestCards.map(tc => tc.cardId));
+
+      // Determine which cards to add and which to remove.
+      const cardsToAdd = [...newCardIds].filter(id => !currentCardIds.has(id));
+      const cardsToRemove = [...currentCardIds].filter(id => !newCardIds.has(id));
+
+      // --- Step B: Execute the database mutations ---
+
+      // Update the test's description.
+      await tx.test.update({
+        where: { id: testId },
+        data: { description: description },
+      });
+
+      // Remove the old card associations.
+      if (cardsToRemove.length > 0) {
+        await tx.testCard.deleteMany({
+          where: { testId: testId, cardId: { in: cardsToRemove } },
+        });
+      }
+
+      // Add the new card associations.
+      if (cardsToAdd.length > 0) {
+        await tx.testCard.createMany({
+          data: cardsToAdd.map(cardId => ({ testId, cardId })),
+        });
+      }
+
+      // --- Step C: Update the `em_uso` status for affected cards ---
+
+      // Set `em_uso: true` for any newly added cards.
+      if (cardsToAdd.length > 0) {
+        await tx.card.updateMany({
+          where: { id: { in: cardsToAdd } },
+          data: { inUse: true },
+        });
+      }
+
+      // For cards that were removed, we need to check if they are still part of
+      // any *other* test before we mark them as no longer in use.
+      if (cardsToRemove.length > 0) {
+        // Find which of the removed cards are still linked to other tests.
+        const remainingLinks = await tx.testCard.findMany({
+          where: { cardId: { in: cardsToRemove } },
+          select: { cardId: true }
+        });
+        const stillInUseIds = new Set(remainingLinks.map(link => link.cardId));
+        
+        // Filter for the cards that are now truly free.
+        const cardsToFree = cardsToRemove.filter(id => !stillInUseIds.has(id));
+
+        if (cardsToFree.length > 0) {
+          await tx.card.updateMany({
+            where: { id: { in: cardsToFree } },
+            data: { inUse: false },
+          });
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Erro ao atualizar o teste:", error);
+    return { status: "error", message: "Falha ao atualizar o teste no banco de dados." };
+  }
+
+  // 5. On success, revalidate the cache and return a success message.
+  revalidatePath("/admin/tests");
+  return { status: "success", message: "Teste atualizado com sucesso!" };
 }

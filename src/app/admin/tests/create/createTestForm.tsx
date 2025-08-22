@@ -3,13 +3,13 @@
 import * as React from "react";
 import { useActionState } from "react";
 import { useReactTable, getCoreRowModel, RowSelectionState } from "@tanstack/react-table";
-import { columns } from "./columns";
 import { DataTable } from "@/components/ui/data-table"; // Our reusable DataTable
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@prisma/client";
 import { useFormStatus } from "react-dom";
 import { createTest } from "@/actions/testActions";
+import {columns} from "../cardSelectionColumns"
 
 // This is a helper component for the submit button's pending state
 function SubmitButton() {

@@ -7,6 +7,7 @@ import { ReactNode } from "react";
 import { Navbar } from "@/components/navbar/navBar";
 import { Providers } from "./providers";
 import { auth } from "@/lib/auth"; // 1. Import the server-side auth helper
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,6 +44,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
             {children}
           </main>
         </Providers>
+        <Toaster/>
       </body>
     </html>
   );

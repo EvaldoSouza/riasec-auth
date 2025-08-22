@@ -87,10 +87,11 @@ model Card {
 
 model Application {
   id                String    @id @default(cuid())
+  title             String    // ex., "Avaliação Turma A - 2025"
   location          String?
-  scheduledDateTime DateTime  @map("scheduled_date_time")
-  startTime         DateTime? @map("start_time")
-  endTime           DateTime? @map("end_time")
+  availableFrom     DateTime  @map("available_from")
+  availableUntil    DateTime? @map("available_until")
+  durationInMinutes Int?      @map("duration_in_minutes")
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 

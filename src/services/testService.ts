@@ -17,3 +17,28 @@ export async function getAllTests() {
     }
     
 }
+
+/**
+ * Fetches a single test by its ID, including the IDs of the cards it contains.
+ * @param id The ID of the test to fetch.
+ */
+export async function getTestByIdWithCards(id: string) {
+  try {
+    const test = await prisma.test.findUnique({
+      where: { id },
+      include: {
+        // We include the 'cards' relation to get the join table records.
+        // We only select the 'cardId' to be efficient.
+        cards: {
+          select: {
+            cardId: true,
+          },
+        },
+      },
+    });
+    return test;
+  } catch (error) {
+    console.error("Failed to fetch test by ID:", error);
+    return null;
+  }
+}

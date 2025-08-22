@@ -31,16 +31,11 @@ function DataTableRowActions({ test }: { test: Test }) {
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Ações</DropdownMenuLabel>
         <DropdownMenuItem asChild>
-          <Link href={`/admin/tests/edit/${test.id}`}>Editar Teste</Link>
+          <Link href={`/admin/tests/${test.id}/edit`}>Editar Teste</Link>
         </DropdownMenuItem>
         <DropdownMenuItem>Ver Aplicações</DropdownMenuItem>
         <DropdownMenuSeparator />
-
-        {/* --- THIS IS THE INTEGRATION --- */}
-        {/* 2. We wrap the trigger (the DropdownMenuItem) with our dialog component. */}
         <DeleteTestDialog testId={test.id}>
-          {/* 3. The `onSelect` prop prevents the dropdown from closing when this item is clicked,
-              allowing the confirmation dialog to open smoothly. */}
           <DropdownMenuItem
             onSelect={(e) => e.preventDefault()}
             className="text-destructive focus:bg-destructive/10"
