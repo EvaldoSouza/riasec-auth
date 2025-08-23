@@ -44,3 +44,43 @@ export async function getAllApplications(): Promise<ApplicationWithDetails[]> {
     return [];
   }
 }
+
+const applicationWithParticipants = Prisma.validator<Prisma.ApplicationDefaultArgs>()({
+  include: {
+    test: { select: { description: true } },
+    participants: {
+      include: {
+        user: { // For each participant, include their user details
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+    },
+  },
+});
+
+export type ApplicationWithParticipants = Prisma.ApplicationGetPayload<
+  typeof applicationWithParticipants
+>;
+
+/**
+ * Fetches a single Application by its ID, including all its participants
+ * and their associated user information.
+ */
+export async function getApplicationWithParticipants(
+  applicationId: string
+): Promise<ApplicationWithParticipants | null> {
+  try {
+    const application = await db.application.findUnique({
+      where: { id: applicationId },
+      // Use the include helper we defined above for a clean query.
+      ...applicationWithParticipants,
+    });
+    return application;
+  } catch (error) {
+    console.error("Failed to fetch application with participants:", error);
+    return null;
+  }
+}

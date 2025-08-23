@@ -18,8 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-// We will need to create a DeleteApplicationDialog similar to our other features.
-// import { DeleteApplicationDialog } from "./DeleteApplicationDialog";
+import { DeleteApplicationDialog } from "./deleteApplicationDialog";
 
 /**
  * Renders the "three dots" action menu for each row.
@@ -46,13 +45,13 @@ function DataTableRowActions({
           <Link href={`/admin/applications/${application.id}/edit`}>Editar Aplicação</Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        {/*
+        
         <DeleteApplicationDialog applicationId={application.id}>
           <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
             Deletar Aplicação
           </DropdownMenuItem>
         </DeleteApplicationDialog>
-        */}
+       
       </DropdownMenuContent>
     </DropdownMenu>
   );

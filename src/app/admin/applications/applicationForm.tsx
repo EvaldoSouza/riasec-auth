@@ -1,14 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useReactTable, getCoreRowModel, RowSelectionState } from "@tanstack/react-table";
-import { Test, User } from "@prisma/client";
-import { createApplication } from "@/actions/applicationActions";
+import { Application, Test, User } from "@prisma/client";
 import { columns as userSelectionColumns } from "./userSelectionColumns";
 import { DataTable } from "@/components/ui/data-table";
 import { Input } from "@/components/ui/input";
@@ -17,6 +15,8 @@ import { toast } from "sonner";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DateTimePicker } from "@/components/ui/datetime-picker";
+import { createApplication, updateApplication } from "@/actions/applicationActions";
+import { ActionState } from "@/lib/definitions";
 
 // 1. A comprehensive Zod schema for client-side validation.
 const formSchema = z.object({
@@ -38,21 +38,35 @@ const formSchema = z.object({
   path: ["availableUntil"], // Associate the error with the end date field.
 });
 
-// Helper component for the submit button's pending state.
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return <Button type="submit" disabled={pending}>{pending ? "Agendando..." : "Agendar Aplicação"}</Button>;
-}
 
-interface CreateApplicationFormProps {
+type ApplicationForEdit = Application & { participants: { userId: string }[] };
+
+interface ApplicationFormProps {
   tests: Test[];
   users: User[];
+  application?: ApplicationForEdit;
 }
 
-export function CreateApplicationForm({ tests, users }: CreateApplicationFormProps) {
+export function ApplicationForm({ tests, users, application }: ApplicationFormProps) {
   const router = useRouter();
-  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
+  const isEditMode = !!application;
   
+  
+  // 2. State management for the DataTable's row selection.
+  const initialRowSelection = React.useMemo(() => {
+    if (!isEditMode) return {};
+    const selectedUserIds = new Set(application.participants.map(p => p.userId));
+    const selection: RowSelectionState = {};
+    users.forEach((user, index) => {
+      if (selectedUserIds.has(user.id)) {
+        selection[index] = true;
+      }
+    });
+    return selection;
+  }, [application, users, isEditMode]);
+  
+  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>(initialRowSelection);
+
   const table = useReactTable({
     data: users,
     columns: userSelectionColumns,
@@ -60,44 +74,51 @@ export function CreateApplicationForm({ tests, users }: CreateApplicationFormPro
     onRowSelectionChange: setRowSelection,
     state: { rowSelection },
   });
-  
+
   const selectedUserIds = table.getFilteredSelectedRowModel().rows.map(row => row.original.id);
 
   // 3. react-hook-form manages the state of our complex form fields.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: "", // Initialize text inputs with an empty string instead of undefined
-      testId: undefined, // `undefined` is fine for <Select> and <DateTimePicker> placeholders
-      availableFrom: undefined,
-      availableUntil: undefined,
-      durationInMinutes: undefined,
+      title: application?.title ?? "",
+      testId: application?.testId ?? undefined,
+      availableFrom: application?.availableFrom ?? undefined,
+      availableUntil: application?.availableUntil ?? undefined,
+      durationInMinutes: application?.durationInMinutes ?? undefined,
     },
   });
 
-   async function onSubmit(values: z.infer<typeof formSchema>) {
+  const { isSubmitting } = form.formState;
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     const formData = new FormData();
-    // Append all form values to formData
     formData.append('title', values.title);
     formData.append('testId', values.testId);
     formData.append('availableFrom', values.availableFrom.toISOString());
-    if (values.availableUntil) {
-      formData.append('availableUntil', values.availableUntil.toISOString());
-    }
-    if (values.durationInMinutes) {
-      formData.append('durationInMinutes', values.durationInMinutes.toString());
-    }
+    if (values.availableUntil) formData.append('availableUntil', values.availableUntil.toISOString());
+    if (values.durationInMinutes) formData.append('durationInMinutes', values.durationInMinutes.toString());
     formData.append('userIds', selectedUserIds.join(','));
 
-    // Call the server action.
-    const result = await createApplication(null, formData);
+    let result: ActionState;
+    
+    try {
+      if (isEditMode) {
+        formData.append('applicationId', application.id);
+        result = await updateApplication(null, formData);
+      } else {
+        result = await createApplication(null, formData);
+      }
 
-    // Handle the result with toasts and navigation.
-    if (result.status === 'success') {
-      toast.success(result.message);
-      router.push('/admin/applications');
-    } else {
-      toast.error(result.message);
+      if (result?.status === 'success') {
+        toast.success(result.message);
+        router.push('/admin/applications');
+      } else if (result?.status === 'error') {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      console.log(error)
+      toast.error("Ocorreu um erro inesperado. Por favor, tente novamente.");
     }
   }
 
@@ -134,13 +155,15 @@ export function CreateApplicationForm({ tests, users }: CreateApplicationFormPro
             <DataTable table={table} columns={userSelectionColumns} />
           </div>
         </div>
+        
+        <div className="flex justify-end">
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Salvando..." : (isEditMode ? "Salvar Alterações" : "Agendar Aplicação")}
+          </Button>
+        </div>
 
         {/* 6. Hidden inputs pass data that isn't a direct form field to the action. */}
         <input type="hidden" name="userIds" value={selectedUserIds.join(',')} />
-        
-        <div className="flex justify-end">
-          <SubmitButton />
-        </div>
       </form>
     </Form>
   );

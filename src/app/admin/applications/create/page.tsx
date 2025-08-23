@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { getAllTests } from '@/services/testService';
 import { getAllClientes } from '@/services/userServices';
-import { CreateApplicationForm } from './createApplicationForm';
+import { ApplicationForm } from '../applicationForm';
 
 export default async function CreateApplicationPage() {
   // Security Check
@@ -26,7 +26,7 @@ export default async function CreateApplicationPage() {
         </p>
       </div>
       
-      <CreateApplicationForm tests={tests} users={users} />
+      <ApplicationForm tests={tests} users={users} />
     </div>
   );
 }
