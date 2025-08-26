@@ -14,8 +14,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ApplicationStatus } from "@prisma/client";
 
 // 1. Define the props. It receives columns and the server-fetched data.
 interface ApplicationListProps<TData, TValue> {
@@ -63,26 +61,7 @@ export function ApplicationList<TData, TValue>({
           }
           className="max-w-sm"
         />
-        <Select
-          value={(table.getColumn("status")?.getFilterValue() as string) ?? "all"}
-          onValueChange={(value) =>
-            // If 'all' is selected, clear the filter. Otherwise, set the filter.
-            value === "all"
-              ? table.getColumn("status")?.setFilterValue(undefined)
-              : table.getColumn("status")?.setFilterValue(value)
-          }
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filtrar por status..." />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os Status</SelectItem>
-            {/* We can get the enum values from Prisma to build the options */}
-            {Object.values(ApplicationStatus).map(status => (
-              <SelectItem key={status} value={status}>{status}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        
       </div>
       
       {/* 5. Our reusable DataTable component renders the actual table. */}

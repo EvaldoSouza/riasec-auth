@@ -124,6 +124,7 @@ model Answer {
   userApplication             UserApplication @relation(fields: [userApplicationUserId, userApplicationApplicationId], references: [userId, applicationId], onDelete: Cascade)
 
   @@map("answers")
+  @@unique([userApplicationUserId, userApplicationApplicationId, cardId])
 }
 
 

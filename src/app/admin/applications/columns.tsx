@@ -9,7 +9,6 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { MoreHorizontal, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -70,17 +69,6 @@ export const columns: ColumnDef<ApplicationWithDetails>[] = [
     id: "test",
     accessorFn: (row) => row.test.description, // Access nested data for sorting/filtering
     header: "Teste",
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => {
-      const status = row.getValue("status") as string;
-      // Use different badge variants for a better visual cue.
-      const variant: "default" | "secondary" | "outline" = 
-        status === 'COMPLETED' ? 'default' : status === 'IN_PROGRESS' ? 'outline' : 'secondary';
-      return <Badge variant={variant}>{status}</Badge>;
-    },
   },
   {
     id: "participants",
