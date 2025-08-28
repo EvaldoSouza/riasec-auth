@@ -2,20 +2,17 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { ActionState } from "@/lib/definitions";
 import { ApplicationStatus } from "@prisma/client";
 
-// 1. A robust Zod schema to validate all the data from the creation form.
+
 const createApplicationSchema = z.object({
   title: z.string().min(3, { message: "O título deve ter pelo menos 3 caracteres." }),
   testId: z.string().cuid({ message: "Selecione um teste válido." }),
-  // `z.coerce.date()` is used to safely convert string inputs from the form into Date objects.
   availableFrom: z.coerce.date(),
-  availableUntil: z.coerce.date().optional(),
-  // `z.coerce.number()` converts the string input to a number.
+  availableUntil: z.coerce.date(),
   durationInMinutes: z.coerce.number().positive().optional(),
   // We expect a comma-separated string of user IDs.
   userIds: z.string().min(1, { message: "Você deve selecionar pelo menos um usuário." }),
@@ -90,7 +87,8 @@ export async function createApplication(
 
   // 4. On success, revalidate the cache and redirect the admin.
   revalidatePath("/admin/applications");
-  redirect("/admin/applications");
+
+  return { status: "success", message: "Aplicação agendada com sucesso!" };
 }
 
 /**

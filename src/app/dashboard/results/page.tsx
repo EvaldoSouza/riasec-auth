@@ -1,40 +1,55 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { ResultsReport } from '@/components/dashboard/results/resultsReport';
+import { getLatestCompletedResult } from '@/services/resultServices';
+import { z } from 'zod';
+import { CalculatedRiasecResult } from '@/types/dashboard';
 
-// We import the type of the specific function we're going to use.
-import type { getDetailedTestResult as GetDetailedTestResult } from '@/services/dashboardService';
+// 1. Create a Zod schema to validate the shape of the `scores` JSON from the database.
+// This is a crucial step for type safety.
+const scoresSchema = z.object({
+  realistic: z.number(),
+  investigative: z.number(),
+  artistic: z.number(),
+  social: z.number(),
+  enterprising: z.number(),
+  conventional: z.number(),
+});
 
 export default async function ResultsPage() {
   const session = await auth();
-
   if (!session?.user?.id) {
     return redirect('/sign-in?callbackUrl=/dashboard/results');
   }
 
-  // 1. We update the conditional import to only pull the specific function we need.
-  const { getDetailedTestResult }: { getDetailedTestResult: typeof GetDetailedTestResult } =
-    await (process.env.NEXT_PUBLIC_MOCK_API === "true"
-      ? import("@/services/dashboardService.mock")
-      : import("@/services/dashboardService"));
+  // 2. Fetch the data using our new, efficient service function.
+  const resultFromDb = await getLatestCompletedResult(session.user.id);
 
-  // 2. We now call our new, more efficient function.
-  // This fetches only the data required for the results report.
-  const result = await getDetailedTestResult(session.user.id);
-
-  // 3. The rest of the logic remains the same.
-  // We handle the case where no result is found.
-  if (!result) {
+  // 3. Handle the case where the user has not completed a test yet.
+  if (!resultFromDb) {
     return (
       <div className="text-center">
         <h1 className="text-2xl font-bold">Nenhum resultado encontrado</h1>
         <p className="text-muted-foreground mt-2">
-          Você precisa completar o teste antes de ver seus resultados.
+          Você precisa completar um teste antes de ver seus resultados.
         </p>
       </div>
     );
   }
+  
+  // 4. Safely parse the JSON `scores` field and validate its structure.
+  const parsedScores = scoresSchema.safeParse(resultFromDb.scores);
+  if (!parsedScores.success) {
+    // Handle corrupted or malformed data gracefully.
+    console.error("Failed to parse scores from database:", parsedScores.error);
+    return <div>Ocorreu um erro ao carregar seus resultados.</div>;
+  }
 
-  // And render the report component with the data.
-  return <ResultsReport result={result} />;
+  // 5. Assemble the final, type-safe result object for the UI component.
+  const finalResult: CalculatedRiasecResult = {
+    riasecCode: resultFromDb.riasecCode,
+    scores: parsedScores.data,
+  };
+
+  return <ResultsReport result={finalResult} />;
 }

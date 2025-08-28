@@ -1,22 +1,19 @@
 import {
   Card,
-  //CardContent,
-  CardDescription,
+  CardContent,
+  
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { type CalculatedRiasecResult } from "@/types/dashboard";
 import { ScoreBreakdown } from "./scoreBreakdown";
 import { TypeDescriptions } from "./typeDescriptions";
+import { RiasecRadarChart } from "../cliente/riasecRadarChart"; // 1. Import the chart component
 
 interface ResultsReportProps {
   result: CalculatedRiasecResult;
 }
 
-/**
- * The main container component for displaying the full test report.
- * It orchestrates smaller components to show different aspects of the results.
- */
 export function ResultsReport({ result }: ResultsReportProps) {
   const typeMap = { R: "Realista", I: "Investigativo", A: "Artístico", S: "Social", E: "Empreendedor", C: "Convencional" };
   const topThreeTypes = result.riasecCode.split('').map(char => typeMap[char as keyof typeof typeMap]);
@@ -30,15 +27,32 @@ export function ResultsReport({ result }: ResultsReportProps) {
         </p>
       </div>
 
-      {/* Main summary card */}
+      {/* --- THIS IS THE NEW SECTION --- */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Seu Código RIASEC é: <span className="text-primary">{result.riasecCode}</span></CardTitle>
-          <CardDescription>{topThreeTypes.join(' • ')}</CardDescription>
+          <CardTitle className="text-2xl">Resumo do Perfil</CardTitle>
         </CardHeader>
+        <CardContent className="grid gap-8 md:grid-cols-2">
+          {/* Left Column: Textual Summary */}
+          <div className="space-y-6 flex flex-col justify-center">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Seu Código RIASEC é:</p>
+              <p className="text-6xl font-extrabold tracking-tighter text-primary">{result.riasecCode}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Seus Tipos Dominantes:</p>
+              <p className="text-xl font-semibold">{topThreeTypes.join(' • ')}</p>
+            </div>
+          </div>
+          {/* Right Column: Visual Chart */}
+          <div>
+            <RiasecRadarChart scores={result.scores} />
+          </div>
+        </CardContent>
       </Card>
+      {/* --- END NEW SECTION --- */}
 
-      {/* Render the smaller, specialized components */}
+      {/* The other components remain as they were */}
       <ScoreBreakdown scores={result.scores} />
       <TypeDescriptions topTypes={topThreeTypes} />
     </div>

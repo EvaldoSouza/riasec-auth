@@ -8,6 +8,7 @@ import { ApplicationStatus } from "@prisma/client";
 import z from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { calculateRiasecFromResponses } from "@/lib/riasecCalculator";
 
 
 // This is the shape of the data we'll receive from the client
@@ -98,32 +99,61 @@ export async function finishTest(
   const { applicationId } = validatedFields.data;
 
   try {
-    // A transaction is still a good practice for the validation and update.
+    // 2. We use a transaction to ensure all final database updates are atomic.
     await prisma.$transaction(async (tx) => {
-      // 1. Fetch all necessary data for validation.
+      // First, fetch all the data we need in one comprehensive query.
       const userApplication = await tx.userApplication.findUnique({
         where: { userId_applicationId: { userId, applicationId } },
         include: {
-          answers: { select: { cardId: true } }, // We only need the answers to count them
-          application: { include: { test: { select: { _count: { select: { cards: true } } } } } },
+          // We need the answers with their related cards for the calculator.
+          answers: {
+            include: {
+              card: true,
+            },
+          },
+          // We need to know the total number of cards in the test for validation.
+          application: {
+            include: {
+              test: {
+                select: {
+                  cards: {
+                    select: { cardId: true }
+                  }
+                },
+              },
+            },
+          },
         },
       });
 
       if (!userApplication) throw new Error("Aplicação não encontrada.");
 
-      // 2. Final Validation: Ensure all questions have been answered.
-      const requiredCardCount = userApplication.application.test._count.cards;
+      // 3. Final server-side validation: ensure all questions were answered.
+      const requiredCardCount = userApplication.application.test.cards.length;
       if (userApplication.answers.length < requiredCardCount) {
-        console.log("QUANTOS CARTOES A FUNCAO ACHA QUE TEM", userApplication.answers.length)
         throw new Error("Por favor, responda todas as questões antes de finalizar.");
       }
 
-      // --- REMOVED ---
-      // The logic for calculating results and saving to the TestResult table
-      // would go here in the future.
-      // --- END REMOVED ---
+      // 4. Call our calculation service to get the final result.
+      const calculatedResult = calculateRiasecFromResponses(userApplication.answers);
 
-      // 3. Update the UserApplication status to COMPLETED.
+      // 5. Save the final result to the TestResult table.
+      // We use `upsert` to be robust in case this action is ever re-run.
+      await tx.testResult.upsert({
+        where: { userId_applicationId: { userId, applicationId } },
+        update: {
+          riasecCode: calculatedResult.riasecCode,
+          scores: calculatedResult.scores,
+        },
+        create: {
+          userId,
+          applicationId,
+          riasecCode: calculatedResult.riasecCode,
+          scores: calculatedResult.scores,
+        },
+      });
+
+      // 6. Update the UserApplication status to COMPLETED.
       await tx.userApplication.update({
         where: { userId_applicationId: { userId, applicationId } },
         data: {
@@ -137,7 +167,7 @@ export async function finishTest(
     return { status: "error", message: error instanceof Error ? error.message : "Não foi possível finalizar o teste." };
   }
 
-  // 4. On success, revalidate and redirect.
+  // 7. On success, revalidate the dashboard cache and redirect the user there.
   revalidatePath("/dashboard");
   redirect("/dashboard");
 }

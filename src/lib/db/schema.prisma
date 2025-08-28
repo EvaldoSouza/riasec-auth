@@ -167,11 +167,29 @@ model UserApplication {
   answers Answer[] // A user's participation is composed of many answers
 
   status    ApplicationStatus @default(NOT_STARTED)
+  TestResult TestResult[]
 
   @@id([userId, applicationId])
   @@map("user_applications")
 }
 
+model TestResult {
+  id String @id @default(cuid())
+
+  // The final 3-letter RIASEC code
+  riasecCode String @map("riasec_code")
+
+  // store the detailed scores for all six types as a JSON object.
+  scores Json
+
+  // A unique link back to the specific test attempt this result belongs to.
+  userId        String
+  applicationId String
+  userApplication UserApplication @relation(fields: [userId, applicationId], references: [userId, applicationId], onDelete: Cascade)
+
+  @@unique([userId, applicationId])
+  @@map("test_results")
+}
 
 // --- AUTH.JS MODELS ---
 
