@@ -1,74 +1,78 @@
+"use client"; // This component now has logic and links, so it's a client component.
+
 import Link from "next/link";
-// 1. Import the ApplicationStatus enum directly from the Prisma client.
-import { type ApplicationStatus } from "@prisma/client";
 import {
   Card,
+  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { UserApplicationForDashboard } from "@/services/dashboardService";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
-// 2. The local 'TestStatus' type is no longer needed.
-
-// 3. Update the props to use the imported ApplicationStatus enum.
 interface TestStatusCardProps {
-  status: ApplicationStatus | 'NOT_STARTED'; // Accommodate the default initial state
-  applicationId?: string;
+  application: UserApplicationForDashboard | null;
 }
 
-/**
- * A dynamic card that displays the user's test status and provides
- * the primary call to action (CTA).
- */
-export function TestStatusCard({ status, applicationId }: TestStatusCardProps) {
-  let title: string;
-  let description: string;
-  let buttonElement: React.ReactNode;
-
-  // 4. Update the switch statement to use the enum members for comparison.
-  switch (status) {
-    case 'IN_PROGRESS':
-      title = "Continue de Onde Parou";
-      description = "Você já iniciou o teste. Continue para ver seus resultados.";
-      buttonElement = (
-        <Button asChild>
-          <Link href={`/test/${applicationId}`}>Continuar o Teste</Link>
-        </Button>
-      );
-      break;
-
-    case 'COMPLETED':
-      title = "Teste Concluído!";
-      description = "Seus resultados estão prontos. Explore seu perfil detalhado e as carreiras que mais combinam com você.";
-      buttonElement = (
-        <Button asChild>
-          <Link href="/dashboard/results">Ver Relatório Completo</Link>
-        </Button>
-      );
-      break;
-
-    case 'NOT_STARTED':
-    default:
-      title = "Pronto para Começar?";
-      description = "Faça o teste para descobrir seu perfil e receber recomendações de carreira personalizadas.";
-      buttonElement = (
-        <Button asChild>
-          <Link href="/test/start">Começar o Teste Agora</Link>
-        </Button>
-      );
-      break;
+export function TestStatusCard({ application }: TestStatusCardProps) {
+  
+  // Case 1: User has no upcoming or in-progress tests.
+  if (!application) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Nenhum Teste Agendado</CardTitle>
+          <CardDescription>
+            Você não possui nenhum teste agendado ou em andamento no momento.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    );
   }
+
+  // Determine if the test is available to start
+  const isAvailableToStart = new Date() >= application.application.availableFrom;
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
+        <CardTitle>
+          {/* Show a different title based on the status */}
+          {application.status === 'IN_PROGRESS' && "Continue seu Teste"}
+          {application.status === 'NOT_STARTED' && isAvailableToStart && "Você tem um teste pronto para começar!"}
+          {application.status === 'NOT_STARTED' && !isAvailableToStart && "Próximo Teste Agendado"}
+        </CardTitle>
+        <CardDescription>
+          {application.application.test.description}
+        </CardDescription>
       </CardHeader>
+      <CardContent>
+        {/* If the test is scheduled for the future, show the date */}
+        {application.status === 'NOT_STARTED' && !isAvailableToStart && (
+          <p>
+            Disponível a partir de:{" "}
+            <span className="font-semibold">
+              {format(application.application.availableFrom, "PPP 'às' p", { locale: ptBR })}
+            </span>
+          </p>
+        )}
+      </CardContent>
       <CardFooter>
-        {buttonElement}
+        {/* Conditionally render the button */}
+        {application.status === 'IN_PROGRESS' && (
+          <Button asChild>
+            <Link href={`/test/${application.applicationId}`}>Continuar Teste</Link>
+          </Button>
+        )}
+        {application.status === 'NOT_STARTED' && isAvailableToStart && (
+          <Button asChild>
+            <Link href={`/test/${application.applicationId}`}>Iniciar Teste Agora</Link>
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

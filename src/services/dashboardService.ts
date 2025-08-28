@@ -1,41 +1,72 @@
-import {
-  CalculatedRiasecResult,
-  CareerSuggestion,
-} from "@/types/dashboard";
+import { prisma } from "@/lib/prisma";
+import { Prisma, ApplicationStatus } from "@prisma/client";
 
-import { type ApplicationStatus } from "@prisma/client"; //isso cria um cliente novo, ou apenas usa as informacoes estaticas?
+// A helper to define the data shape we need for the card
+const userApplicationForDashboard = Prisma.validator<Prisma.UserApplicationDefaultArgs>()({
+  include: {
+    application: {
+      include: {
+        test: {
+          select: {
+            description: true,
+          },
+        },
+      },
+    },
+  },
+});
+
+export type UserApplicationForDashboard = Prisma.UserApplicationGetPayload<
+  typeof userApplicationForDashboard
+>;
 
 /**
- * @file This is a placeholder for the real dashboard data-fetching service.
- * These functions are not yet implemented and will return null.
- * This allows the application to compile without errors while developing with mock data.
+ * Fetches the most relevant, actionable test application for a given user.
+ * It prioritizes a test that is IN_PROGRESS, otherwise it finds the
+ * soonest upcoming test that has NOT_STARTED.
+ * @param userId The ID of the user.
  */
+export async function getNextApplicationForUser(
+  userId: string
+): Promise<UserApplicationForDashboard | null> {
+  try {
+    // First, check if the user has a test currently in progress.
+    const inProgressApplication = await prisma.userApplication.findFirst({
+      where: {
+        userId: userId,
+        status: ApplicationStatus.IN_PROGRESS,
+      },
+      ...userApplicationForDashboard,
+    });
 
-// Define the shape of the complete data object the dashboard expects.
-// This acts as a contract between the service and the component.
-export type DashboardData = {
-  status: ApplicationStatus;
-  result: CalculatedRiasecResult | null;
-  suggestions: CareerSuggestion[];
-  applicationId?: string;
-};
+    if (inProgressApplication) {
+      return inProgressApplication;
+    }
 
-/**
- * PLACEHOLDER: This function will eventually fetch all necessary data for the
- * cliente dashboard from the database.
- * @param userId - The ID of the user whose data is being fetched.
- * @returns A promise that resolves to null, as it's not yet implemented.
- */
-export async function getClienteDashboardData(userId: string): Promise<DashboardData | null> {
-  // A warning to remind developers that this is not the real implementation.
-  console.warn("⚠️ REAL `getClienteDashboardData` IS NOT IMPLEMENTED. Returning null.", userId);
-  
-  // Return null to simulate a state where no data is found or an error occurred.
-  // The calling component (`ClienteDashboard`) is already set up to handle this null case.
-  return null;
-}
+    // If not, find the soonest upcoming test that has not been started yet.
+    const notStartedApplication = await prisma.userApplication.findFirst({
+      where: {
+        userId: userId,
+        status: ApplicationStatus.NOT_STARTED,
+        application: {
+          // Ensure we don't show tests whose availability window has passed.
+          availableUntil: {
+            gte: new Date(), // Greater than or equal to now
+          }
+        }
+      },
+      orderBy: {
+        application: {
+          availableFrom: 'asc', // Get the one starting soonest
+        },
+      },
+      ...userApplicationForDashboard,
+    });
 
-export async function getDetailedTestResult(userId: string): Promise<CalculatedRiasecResult | null> {
-  console.warn("⚠️ REAL `getDetailedTestResult` IS NOT IMPLEMENTED. Returning null.", userId);
-  return null;
+    return notStartedApplication; // This will be the application or null if none are found
+
+  } catch (error) {
+    console.error("Error fetching next application for user:", error);
+    return null;
+  }
 }
