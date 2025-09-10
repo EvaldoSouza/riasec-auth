@@ -6,11 +6,12 @@ import { getAllTests } from '@/services/testService';
 import { getAllClientes } from '@/services/userServices';
 import { ApplicationForm } from '../../applicationForm';
 
-interface EditApplicationPageProps {
-  params: { applicationId: string };
-}
 
-export default async function EditApplicationPage({ params }: EditApplicationPageProps) {
+export default async function EditApplicationPage({
+  params,
+}: {
+  params: Promise<{ applicationId: string }>;
+}) {
   // Security Check
   const session = await auth();
   if (session?.user?.role !== 'APLICADOR') {

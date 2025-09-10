@@ -4,17 +4,13 @@ import { auth } from '@/lib/auth';
 import { getTestForUser, getInitialAnswers } from '@/services/testTakingServices';
 import { TestPlayer } from '@/components/test/testPlayer';
 
-interface TestPageProps {
-  params: {
-    applicationID: string;
-  };
-}
-
 /**
  * The server-side page for the test-taking experience.
  * It handles security, fetches all initial data, and renders the interactive player.
  */
-export default async function TestPage({ params }: TestPageProps) {
+export default async function TestPage({ params }: {params: Promise<{
+    applicationID: string;
+  }>;}) {
   const application = await params;
 
   const session = await auth();

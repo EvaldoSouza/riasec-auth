@@ -8,13 +8,10 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 
-interface ParticipantsPageProps {
-  params: {
-    applicationId: string;
-  };
-}
 
-export default async function ParticipantsPage({ params }: ParticipantsPageProps) {
+export default async function ParticipantsPage({ params }: {params: Promise<{
+    applicationId: string;
+  }>;}) {
   // Security Check
   const session = await auth();
   if (session?.user?.role !== 'APLICADOR') {

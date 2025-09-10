@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { Card } from "@prisma/client";
-import { createCard, updateCard, ActionState } from "@/actions/cardActions";
+import { createCard, updateCard } from "@/actions/cardActions";
 import {
   Form,
   FormControl,
@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { ActionState } from "@/lib/definitions";
 
 // 1. A single, reusable Zod schema defines the validation rules for the form.
 const riasecTypes = z.enum([

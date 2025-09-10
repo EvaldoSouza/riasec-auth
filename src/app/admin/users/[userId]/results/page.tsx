@@ -18,13 +18,9 @@ const scoresSchema = z.object({
   conventional: z.number(),
 });
 
-interface UserResultsPageProps {
-  params: {
+export default async function UserResultsPage({ params }: {params: Promise<{
     userId: string;
-  };
-}
-
-export default async function UserResultsPage({ params }: UserResultsPageProps) {
+  }>;}) {
   // 1. Security Check: Ensure the person VIEWING the page is an admin.
   const session = await auth();
   if (session?.user?.role !== 'APLICADOR') {
@@ -32,7 +28,8 @@ export default async function UserResultsPage({ params }: UserResultsPageProps) 
   }
 
   // 2. Data Fetching: Fetch the results for the user specified in the URL.
-  const resultFromDb = await getLatestCompletedResult(params.userId);
+  const userParams = await params
+  const resultFromDb = await getLatestCompletedResult(userParams.userId);
 
   // 3. Handle cases where the user has no completed test.
   if (!resultFromDb) {

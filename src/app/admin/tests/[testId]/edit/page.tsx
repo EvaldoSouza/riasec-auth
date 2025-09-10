@@ -5,14 +5,9 @@ import { getTestByIdWithCards } from '@/services/testService';
 import { getAllCards } from '@/services/cardService';
 import { EditTestForm } from './editTestForm';
 
-// This page component receives `params` because it's in a dynamic route folder `[testId]`.
-interface EditTestPageProps {
-  params: {
+export default async function EditTestPage({ params }: {params: Promise<{
     testId: string;
-  };
-}
-
-export default async function EditTestPage({ params }: EditTestPageProps) {
+  }>;}) {
   // 1. Security check on the server.
   const session = await auth();
   if (session?.user?.role !== 'APLICADOR') {

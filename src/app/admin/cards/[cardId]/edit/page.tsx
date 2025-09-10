@@ -2,14 +2,10 @@ import { redirect, notFound } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { getCardById } from '@/services/cardService';
 import { CardForm } from '../../cardForm';
-// 1. This page component receives `params` because it's in a dynamic route folder `[cardId]`.
-interface EditCardPageProps {
-  params: {
-    cardId: string;
-  };
-}
 
-export default async function EditCardPage({ params }: EditCardPageProps) {
+export default async function EditCardPage({ params }: {params: Promise<{
+    cardId: string;
+  }>;}) {
   // 2. Security: Ensure only authorized users can access this page.
   const session = await auth();
   if (session?.user?.role !== 'APLICADOR') {
@@ -17,7 +13,8 @@ export default async function EditCardPage({ params }: EditCardPageProps) {
   }
 
   // 3. Fetch the specific card using the ID from the URL params.
-  const card = await getCardById(params.cardId);
+  const cardParams = await params
+  const card = await getCardById(cardParams.cardId);
 
   // 4. Best Practice: If no card is found for the given ID, render the 404 page.
   if (!card) {
