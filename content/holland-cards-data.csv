@@ -1,0 +1,73 @@
+TIPO,HABILIDADE,AFIRMAÇÃO
+Realista,Operar equipamentos,Operar equipamentos eletrônicos ou mecânicos
+Realista,Construir,"Erguer estruturas de todo tipo, executar projetos de construção"
+Realista,Executar procedimentos técnicos,Usar ferramentas eletrônicas ou mecânicas para obter resultados específicos em intervenções técnicas
+Realista,Reparar/consertar,"Diagnosticar e corrigir problemas no funcionamento de equipamentos mecânicos, eletrônicos ou organismos vivos"
+Realista,Utilizar coordenação corporal,"Usar o corpo com destreza, equilíbrio e precisão de movimentos"
+Realista,Manipular com precisão,"Usar destreza e precisão na manipulação de objetos, ferramentas e máquinas"
+Realista,Lidar com carpintaria,"Construir, reformar ou fazer a manutenção de estruturas e objetos."
+Realista,Usar força física,"Usar força e resistência em atividades físicas, suportar desgaste físico"
+Realista,Transportar,Dirigir veículos transportando passageiros ou produtos
+Realista,Lidar com animais,"Alimentar, reproduzir, treinar ou expor animais domésticos ou do campo"
+Realista,Cultivar plantas,"Cultivar vegetais para fins ornamentais ou de alimentação. Preparar o solo, semear, fertilizar, eliminar pragas, colher, etc."
+Realista,Usar habilidades mecânicas,"Montar, ajustar, consertar, usando ferramentas e/ou o próprio corpo"
+Investigativo,Resolver problemas lógicos,Identificar as causas de um problema prático ou teórico e propor uma solução
+Investigativo,Investigar,"Pesquisar, utilizando a observação, leituras ou entrevistas para descobrir ou testar hipóteses científicas"
+Investigativo,Sintetizar,"Articular fatos, conceitos ou ideias revelando seus padrões significativos de interação"
+Investigativo,Escrever,Demonstrar hablidades no uso da linguagem escrita para a explanação de conceitos complexos
+Investigativo,Produzir ideias,"Refletir, conceber novas e criativas ideias, teorias ou processos"
+Investigativo,Conceituar,Usar modelos teóricos para entender fenômenos humanos nou naturais
+Investigativo,Observar,"Estudar, escrutinar, examinar com atenção dados, pessoas ou coisas"
+Investigativo,Ler/estudar,Pesquisar e explorar fontes escritas exaustivamente e aprofundar conhecimentos
+Investigativo,Inventar,"Criar um novo produto, conceito ou processo através do estudo teórico e/ou empírico"
+Investigativo,Calcular,Usar a matemática para compreender e resolver problemas complexos
+Investigativo,Inovar,"Inovar procedimentos estabelecidos, desenvolver alternativas"
+Investigativo,Visualizar,Habilidade de perceber e antecipar futuras tendências e possibilidades
+Artistico,Entreter,"Apresentar obra artística, entreter o público com recursos cênicos e/ou de oratória"
+Artistico,Redação criativa,"Expressar-se criativamente através de produções literárias ou jornalísticas (livros, contos, poesias)"
+Artistico,Composição musical,Compor ou arranjar peças musicais
+Artistico,Produzir artezanatos,"Usar inventividade, motricidade fina e senso estético para produzir objetos belos e incomuns"
+Artistico,Utilizar a intuição,Contar com pressentimentos e outros estados subjetivos peculiares como base para a percepção ou tomada de decisões
+Artistico,Retratar,"Expressar ideias ou estados subjetivos através de desenhos, pinturas, fotografias ou esculturas"
+Artistico,Imaginar,"Fantasiar, inventar, conceber possibilidades, estar aberto ao novo"
+Artistico,Exibir/expor,Usar senso estético para apresentar ou representar ideias ou objetos em público
+Artistico,Produzir figurinos,"Produzir e/ou escolher vestuário para personagens em produções cênicas (teatro, TV, cinema) ou para pessoas públicas"
+Artistico,Design,"Conceber formas estéticas e funcionais para peças de todo tipo (vestuário, móveis, objetos, etc.)"
+Artistico,Atuar/dramatizar,"Interpretar papéis, dar vida a personagens, ideias ou problemas em diversos contextos (teatro, TV, propaganda, apresentações, etc.)"
+Artistico,Decorar ambientes,"Escolher e dispor objetos de modo a ornar, enfeitar, embelezar interiores"
+Social,Contato com o público,"Receber e saudar pessoas, dar informações, orientar"
+Social,Explicar,"Comunicar informações ou ideias de forma organizada, clara e paciente"
+Social,Receber/ hospedar,Receber e oferecer conforto a pessoas
+Social,Aconselhar,"Ouvir com empatia, facilitar o esclarecimento de estados subjetivos e auxiliar a tomada de decisões"
+Social,Conectar pessoas,"Facilitar vínculos entre pessoas ou grupos, aperfeiçoar a comunicação, promover cooperação"
+Social,Falar para grupos,"Expor ideias e informações a fim de esclarecer, orientar e ajudar"
+Social,Lidar com sentimentos,"Facilitar a expressão, ouvir e mostrar sensibilidade e respeito a sentimentos, aplacar tensões, animar"
+Social,Entrevistar,Obter opiniões e informações através de conversa e questionamento
+Social,Escutar,Concentrar-se no discurso do interlocutor e compreender o que este comunica
+Social,Treinar/instruir,Ensinar ou capacitar através de explicações e demonstrações práticas
+Social,Diplomacia,Facilitar a interação entre partes em conflito e chegar a um acordo amigável
+Social,"Tratar, cuidar","Promover o ajustamento, súde ou bem-estar de outras pessoas"
+Empreendedor,Planejar,"Estabelecer etapas e ações encadeadas para alcançar resultados, desenvolver projetos"
+Empreendedor,Influenciar/ persuadir,Convencer outras pessoas a mudar pensamentos ou atitudes ou agir de modo específico
+Empreendedor,Implementar,Tomar providências práticas necessárias para cumprir umplanejamento
+Empreendedor,Promover/ divulgar,"Fazer conhecer ou chamar a atenção sobre uma pessoa, produto ou serviço através de meios de comunicação e/ou situações sociais"
+Empreendedor,Liderar,"Iniciar processos de mudança, inspirar e conduzir outras pessoas na busca de novas possibilidades"
+Empreendedor,Despachar,"Desembaraçar processos de produção ou serviços, identificando e eliminando entraves"
+Empreendedor,Coordenar,Orquestrar a execução integrada de atividades
+Empreendedor,Motivar,Estimular indivíduos ou grupos a perseguir objetivos com entusiasmo
+Empreendedor,Delegar,Designar tarefas para outras pessoas de acordo com suas capacidades para cumprí-las a contento
+Empreendedor,Vender,"Mostrar o valor de um serviço ou produto para atender necessidades de pessoas ou grupos, convencer a comprar"
+Empreendedor,Negociar,Barganhar e permutar vantagens para alcançar um acordo satisfatório
+Empreendedor,Supervisionar,Observar e orientar o desempenho de outras pessoas
+Convencional,Categorizar,Organizar dados ou objetos em grupos de acordo com critérios
+Convencional,Adinistrar dados,"Coletar, sistematizar e manter informações organizadas e disponíveis para acesso"
+Convencional,Revisar / Editar,"Revisar, corrigir e melhorar textos escritos"
+Convencional,Monitorar,Observar e regular procedimentos técnicos de acordo co critérios normativos
+Convencional,Analisar,"Examinar e dicernisr aspectos ou partes de eventos, dados, ideias ou objetos"
+Convencional,Orçar,"Estimar, planejar e agendar gastos ou custos em um determinado período"
+Convencional,Testar,Medir qualidade ou validade de produtos através de metodologia objetiva
+Convencional,Organizar,Ordenar elementos ou atividades para obter uma estruturada e funcional
+Convencional,Fiscalizar,Verificar o cumprimento de regras e procedimentos padronizados ou a correspondência entre registros e fatos
+Convencional,Controlar,"Acompanhar e/ou corrigir a evolução de dados, pessoas ou coisas"
+Convencional,Lidar com finanças,"Utilizar adequadamente dinheiro ou outros recursos, poupar, invetir"
+Convencional,Estruturar rotinas,"Definir procedimentos padronizados de verificação, registro ou controle de dados, pessoas ou coisas"
