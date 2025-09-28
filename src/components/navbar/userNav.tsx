@@ -70,7 +70,7 @@ export function UserNav({ session }: UserNavProps) {
             Sign out
           </button>
         </form> */}
-        <Button onClick={() => signOut()}>Sair</Button>
+        <Button onClick={() => signOut({callbackUrl:'/riasec360'})}>Sair</Button>
       </DropdownMenuContent>
     </DropdownMenu>
   );
