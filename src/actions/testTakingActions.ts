@@ -115,10 +115,10 @@ export async function finishTest(
           application: {
             include: {
               test: {
-                select: {
-                  cards: {
-                    select: { cardId: true }
-                  }
+                include: {
+                  _count: {
+                  select: { cards: true }, // Assumes the relation is named 'cards'
+                },
                 },
               },
             },
@@ -127,12 +127,6 @@ export async function finishTest(
       });
 
       if (!userApplication) throw new Error("Aplicação não encontrada.");
-
-      // 3. Final server-side validation: ensure all questions were answered.
-      const requiredCardCount = userApplication.application.test.cards.length;
-      if (userApplication.answers.length < requiredCardCount) {
-        throw new Error("Por favor, responda todas as questões antes de finalizar.");
-      }
 
       // 4. Call our calculation service to get the final result.
       const calculatedResult = calculateRiasecFromResponses(userApplication.answers);

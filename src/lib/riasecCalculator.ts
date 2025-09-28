@@ -45,12 +45,12 @@ export function calculateRiasecFromResponses(
 
   // A. Initialize score counters for each of the six types.
   const scores = {
-    Realistic: 0,
-    Investigative: 0,
-    Artistic: 0,
+    Realista: 0,
+    Investigativo: 0,
+    Artistico: 0,
     Social: 0,
-    Enterprising: 0,
-    Conventional: 0,
+    Empreendedor: 0,
+    Convencional: 0,
   };
 
   // B. Iterate through each answer and aggregate the scores.
@@ -80,12 +80,12 @@ export function calculateRiasecFromResponses(
   return {
     riasecCode,
     scores: {
-      realistic: scores.Realistic,
-      investigative: scores.Investigative,
-      artistic: scores.Artistic,
+      realistic: scores.Realista,
+      investigative: scores.Investigativo,
+      artistic: scores.Artistico,
       social: scores.Social,
-      enterprising: scores.Enterprising,
-      conventional: scores.Conventional,
+      enterprising: scores.Empreendedor,
+      conventional: scores.Convencional,
     }
   };
 }

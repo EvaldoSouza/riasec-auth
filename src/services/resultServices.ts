@@ -24,6 +24,7 @@ export async function getLatestCompletedResult(userId: string) {
         },
       },
     });
+    console.log(latestResult)
     return latestResult;
   } catch (error) {
     console.error("Error fetching latest completed result:", error);
