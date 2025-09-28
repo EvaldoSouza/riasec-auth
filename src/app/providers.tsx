@@ -9,14 +9,10 @@ type ProvidersProps = {
 };
 
 export function Providers({ children, session }: ProvidersProps) {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
-  const authApiPath = `${basePath}/api/auth`;
+
   return (
     <SessionProvider
-      session={session}
-      // We keep the basePath just in case any other function needs it.
-      basePath={authApiPath}
-     
+      session={session}     
     >
       {children}
     </SessionProvider>

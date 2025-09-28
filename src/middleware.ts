@@ -34,6 +34,7 @@ export default auth((req) => {
       `/api/auth/signin?callbackUrl=${encodedCallbackUrl}`, 
       nextUrl
     ));
+    
   }
 
   // If the user is logged in, allow them to proceed.
