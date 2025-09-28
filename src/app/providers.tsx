@@ -12,7 +12,9 @@ export function Providers({ children, session }: ProvidersProps) {
 
   return (
     <SessionProvider
-      session={session}     
+      session={session}
+      //basePath="/riasec360"
+      basePath="/riasec360/api/auth"           
     >
       {children}
     </SessionProvider>

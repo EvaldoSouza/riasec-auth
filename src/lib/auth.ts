@@ -14,6 +14,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
   // 2. Explicitly set the session strategy to "jwt". This is crucial for middleware.
   session: { strategy: "jwt" },
+  //basePath: '/riasec360',
   providers: [
     Github,
     Credentials({
