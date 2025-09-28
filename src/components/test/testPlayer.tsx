@@ -38,7 +38,7 @@ function FinishButton({ applicationId }: { applicationId: string }) {
       toast.error(state.message);
     }
     // Success is handled by a redirect in the server action.
-  }, [state]);
+  }, [state]); //n precisa disso talvez
 
   return (
     <form action={formAction}>

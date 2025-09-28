@@ -65,7 +65,7 @@ async function main() {
     riasecType: card.TIPO,
     // The 'inUse' field will default to 'false' as defined in your schema.
   }));
-  
+
   // --- 4. Create New Records in the Database ---
   // Using `createMany` is highly efficient for inserting a large number of records at once.
   console.log(`✍️ Creating ${cardsToCreate.length} new cards in the database...`);
