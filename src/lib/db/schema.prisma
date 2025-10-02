@@ -21,6 +21,15 @@ enum ApplicationStatus {
   NOT_STARTED
 }
 
+enum RiasecType {
+  Realista
+  Investigativo
+  Artistico
+  Social
+  Empreendedor
+  Convencional
+}
+
 // --- CORE ENTITIES ---
 
 model User {
@@ -167,7 +176,7 @@ model UserApplication {
   answers Answer[] // A user's participation is composed of many answers
 
   status    ApplicationStatus @default(NOT_STARTED)
-  TestResult TestResult[]
+  TestResult TestResult?
 
   @@id([userId, applicationId])
   @@map("user_applications")

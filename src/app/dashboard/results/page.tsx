@@ -2,19 +2,10 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { ResultsReport } from '@/components/dashboard/results/resultsReport';
 import { getLatestCompletedResult } from '@/services/resultServices';
-import { z } from 'zod';
 import { CalculatedRiasecResult } from '@/types/dashboard';
+import { scoresSchema } from '@/lib/zodSchemas';
 
-// 1. Create a Zod schema to validate the shape of the `scores` JSON from the database.
-// This is a crucial step for type safety.
-const scoresSchema = z.object({
-  realistic: z.number(),
-  investigative: z.number(),
-  artistic: z.number(),
-  social: z.number(),
-  enterprising: z.number(),
-  conventional: z.number(),
-});
+
 
 export default async function ResultsPage() {
   const session = await auth();

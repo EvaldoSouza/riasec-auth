@@ -8,6 +8,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { type CalculatedRiasecResult } from "@/types/dashboard";
+import { riasecLabels } from "@/config/riasecMatrix";
+import { RiasecType } from "@prisma/client";
 
 // Define the props. It expects to receive the 'scores' object.
 interface RiasecRadarChartProps {
@@ -21,14 +23,10 @@ interface RiasecRadarChartProps {
 export function RiasecRadarChart({ scores }: RiasecRadarChartProps) {
   // 1. Recharts expects data as an array of objects. We transform our
   //    'scores' object into this format.
-  const data = [
-    { subject: "Realista", score: scores.realistic },
-    { subject: "Investigativo", score: scores.investigative },
-    { subject: "Artístico", score: scores.artistic },
-    { subject: "Social", score: scores.social },
-    { subject: "Empreendedor", score: scores.enterprising },
-    { subject: "Convencional", score: scores.conventional },
-  ];
+  const data = Object.entries(scores).map(([type, scoreValue]) => ({
+    subject: riasecLabels[type as RiasecType] || type,
+    score: scoreValue
+  }))
 
   return (
     // 2. ResponsiveContainer makes the chart automatically fill its parent container.

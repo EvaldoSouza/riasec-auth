@@ -4,18 +4,13 @@
  * that both our real and mock data services adhere to the same data "contract".
  */
 
+import { RiasecType } from "@prisma/client";
+
 // Represents the calculated scores and code after processing raw test answers.
 // This is the clean data object our <ResultsOverview /> component will expect.
 export type CalculatedRiasecResult = {
   riasecCode: string; // e.g. "SAI"
-  scores: {
-    realistic: number;
-    investigative: number;
-    artistic: number;
-    social: number;
-    enterprising: number;
-    conventional: number;
-  };
+  scores: Record<RiasecType, number>
 };
 
 // Represents a single career suggestion.

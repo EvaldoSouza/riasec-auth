@@ -1,4 +1,4 @@
-import { Answer, Card } from "@prisma/client";
+import { Answer, Card, RiasecType } from "@prisma/client";
 import { CalculatedRiasecResult } from "@/types/dashboard";
 
 /**
@@ -44,14 +44,10 @@ export function calculateRiasecFromResponses(
 ): CalculatedRiasecResult {
 
   // A. Initialize score counters for each of the six types.
-  const scores = {
-    Realista: 0,
-    Investigativo: 0,
-    Artistico: 0,
-    Social: 0,
-    Empreendedor: 0,
-    Convencional: 0,
-  };
+  const scores = Object.values(RiasecType).reduce((acc, type) => {
+    acc[type] = 0;
+    return acc;
+  }, {} as Record<RiasecType, number>);
 
   // B. Iterate through each answer and aggregate the scores.
   for (const answer of answers) {
@@ -79,13 +75,13 @@ export function calculateRiasecFromResponses(
   // D. Return the final, structured result object.
   return {
     riasecCode,
-    scores: {
-      realistic: scores.Realista,
-      investigative: scores.Investigativo,
-      artistic: scores.Artistico,
-      social: scores.Social,
-      enterprising: scores.Empreendedor,
-      conventional: scores.Convencional,
+    scores: { // Ensure this also uses the enum for consistency
+      [RiasecType.Realista]: scores.Realista,
+      [RiasecType.Investigativo]: scores.Investigativo,
+      [RiasecType.Artistico]: scores.Artistico,
+      [RiasecType.Social]: scores.Social,
+      [RiasecType.Empreendedor]: scores.Empreendedor,
+      [RiasecType.Convencional]: scores.Convencional,
     }
   };
 }

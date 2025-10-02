@@ -1,3 +1,4 @@
+"use server"
 import fs from 'fs/promises';
 import path from 'path';
 import matter from 'gray-matter'; // 1. We will use the gray-matter library for parsing.
