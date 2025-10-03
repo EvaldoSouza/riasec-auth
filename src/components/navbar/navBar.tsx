@@ -1,19 +1,14 @@
-// All necessary imports are at the top.
 "use server";
 import Link from "next/link";
-import { auth } from "@/lib/auth"; // The server-side Auth.js helper
-import { UserNav } from "./userNav"; // Importing a dedicated Client Component for interactivity
+import { auth } from "@/lib/auth"; 
+import { UserNav } from "./userNav"; 
 
-// PRINCIPLE 1: A helper function to contain the "intelligence".
-// This function cleanly separates the logic for choosing links from the JSX,
-// making both easier to read.
 const getNavLinksForRole = (role?: 'aplicador' | 'cliente' | string) => {
-  // These links are visible to everyone, including logged-out users.
+
   const baseLinks = [
     { href: "/", label: "Inicio" },
   ];
 
-  // The 'switch' statement is a very clear way to handle role-based logic.
   switch (role) {
     // For the 'aplicador' role [cite: 95]
     case "APLICADOR":
@@ -55,11 +50,10 @@ export async function Navbar() {
   // The JSX block defines the structure. Note how much of this is shared.
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95">
-      <nav className="container flex items-center justify-between h-14">
+      <nav className="flex items-center justify-between w-full h-16 px-10">
         
-        {/* SHARED ELEMENT (DRY Principle): The logo is defined once. */}
-        <Link href="/" className="font-bold">
-          RIASEC 360
+        <Link href="/" className="font-bold flex-1">
+          Vocacione!
         </Link>
         
         {/* DYNAMIC SECTION: The links are rendered from our logic above. */}
@@ -70,10 +64,10 @@ export async function Navbar() {
             </Link>
           ))}
         </div>
-
-        {/* SHARED & COMPOSED ELEMENT (DRY + Composition): The UserNav is defined once. */}
-        {/* We pass the session data down to our interactive Client Component. */}
+        <div className="flex flex-1 justify-end">
         <UserNav session={session} />
+
+        </div>
       </nav>
     </header>
   );

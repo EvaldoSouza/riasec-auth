@@ -20,8 +20,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RIASEC 360",
-  description: "Your Vocational Orientation Platform",
+  title: "Vocacione!",
+  description: "Sua plataforma de Orientação Vocacional",
 };
 
 type RootLayoutProps = {
