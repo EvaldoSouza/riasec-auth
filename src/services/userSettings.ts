@@ -68,7 +68,7 @@ export async function changePassword(
   const { currentPassword, newPassword } = validatedFields.data;
 
   const passwordsMatch = await bcrypt.compare(currentPassword, user.password);
-  if (!passwordsMatch) return { error: "Current password is incorrect." };
+  if (!passwordsMatch) return { error: "A senha atual está incorreta" };
 
   const hashedPassword = await bcrypt.hash(newPassword, 10);
 
@@ -77,9 +77,9 @@ export async function changePassword(
       where: { id: user.id },
       data: { password: hashedPassword },
     });
-    return { success: "Password changed successfully!" };
+    return { success: "Senha alterada corretamente!" };
   } catch (error) {
     console.log(error)
-    return { error: "Failed to change password." };
+    return { error: "Falha ao atualizar a senha" };
   }
 }

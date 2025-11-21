@@ -39,7 +39,7 @@ export default async function SettingsPage() {
       {user.password && (
         <Card>
           <CardHeader>
-            <CardTitle>Change Password</CardTitle>
+            <CardTitle>Alterar Senha</CardTitle>
             <CardDescription>Atualize sua senha aqui.</CardDescription>
           </CardHeader>
           <CardContent>

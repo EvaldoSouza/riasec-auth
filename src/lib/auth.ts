@@ -49,10 +49,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     // 3. The jwt callback is refactored to add the user's ID and role to the token.
     async jwt({ token, user, trigger, session }) {
+      
       if (user) {
         // On sign-in, user object is available.
         token.id = user.id;
         token.role = user.role; // Assuming 'user' object from authorize has the role
+        
+        
       }
       if(trigger === "update" && session?.name) {
         token.name = session.name

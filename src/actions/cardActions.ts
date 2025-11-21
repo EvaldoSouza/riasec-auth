@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { ActionState } from "@/lib/definitions"; // 1. Import the shared ActionState type
 
+
 // Schema for creating and updating a card
 const cardSchema = z.object({
   pergunta: z.string().min(5, { message: "A pergunta deve ter pelo menos 5 caracteres." }),

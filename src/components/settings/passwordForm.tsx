@@ -8,7 +8,7 @@ import { useEffect, useRef, useActionState } from "react";
 
 function ChangePasswordSubmitButton() {
   const { pending } = useFormStatus();
-  return <Button type="submit" disabled={pending}>{pending ? "Changing..." : "Change Password"}</Button>;
+  return <Button type="submit" disabled={pending}>{pending ? "Alterando..." : "Alterar Senha"}</Button>;
 }
 
 export function PasswordForm() {
@@ -24,11 +24,11 @@ export function PasswordForm() {
   return (
     <form ref={formRef} action={formAction} className="space-y-4">
       <div className="space-y-2">
-        <label htmlFor="currentPassword">Current Password</label>
+        <label htmlFor="currentPassword">Senha Atual</label>
         <Input id="currentPassword" name="currentPassword" type="password" required />
       </div>
       <div className="space-y-2">
-        <label htmlFor="newPassword">New Password</label>
+        <label htmlFor="newPassword">Nova Senha</label>
         <Input id="newPassword" name="newPassword" type="password" required />
       </div>
       <ChangePasswordSubmitButton />

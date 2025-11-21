@@ -19,5 +19,6 @@ declare module "next-auth/jwt" {
   // Extend the token type
   interface JWT {
     role: Role;
+
   }
 }
