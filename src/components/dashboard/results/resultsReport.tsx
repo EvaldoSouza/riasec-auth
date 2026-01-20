@@ -26,8 +26,6 @@ export function ResultsReport({ result }: ResultsReportProps) {
           Aqui está um detalhamento do seu perfil de interesses.
         </p>
       </div>
-
-      {/* --- THIS IS THE NEW SECTION --- */}
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">Resumo do Perfil</CardTitle>
@@ -50,9 +48,6 @@ export function ResultsReport({ result }: ResultsReportProps) {
           </div>
         </CardContent>
       </Card>
-      {/* --- END NEW SECTION --- */}
-
-      {/* The other components remain as they were */}
       <ScoreBreakdown scores={result.scores} />
       <TypeDescriptions topTypes={topThreeTypes} />
     </div>

@@ -41,7 +41,7 @@ export function HeroSection({ session }: HeroSectionProps) {
             // --- CTA for LOGGED-OUT users ---
             <>
               <Button asChild size="lg">
-                <Link href="/testes">Criar uma conta</Link>
+                <Link href="/sign-up">Criar uma conta</Link>
               </Button>
               <Button asChild variant="outline" size="lg">
                 <Link href="/sign-in">Já tenho uma conta</Link>

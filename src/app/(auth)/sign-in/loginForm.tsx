@@ -1,16 +1,19 @@
 "use client";
 
-import { useFormState } from "react-dom"; // or 'react' in newer versions
+import { useActionState } from "react"; // Updated from 'react-dom' logic
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { authenticate } from "./loginAction"; // Import the action we created above
+import { authenticate } from "./loginAction";
 
 export function LoginForm() {
-  // errorMessage will hold the string returned by the action
-  const [errorMessage, dispatch] = useFormState(authenticate, undefined);
+  // useActionState returns: [state, actionFunction, isPendingBoolean]
+  const [errorMessage, formAction, isPending] = useActionState(
+    authenticate,
+    undefined
+  );
 
   return (
-    <form action={dispatch} className="space-y-4">
+    <form action={formAction} className="space-y-4">
       <div className="text-lg text-center">Entre para Começar</div>
 
       <Input
@@ -19,24 +22,36 @@ export function LoginForm() {
         type="email"
         required
         autoComplete="email"
+        // Disable input while submitting to prevent data race conditions
+        disabled={isPending} 
       />
+      
       <Input
         name="password"
         placeholder="Password"
         type="password"
         required
         autoComplete="current-password"
+        disabled={isPending}
       />
 
-      {/* 👇 Display the error message here if it exists */}
+      {/* Error Message Display */}
       {errorMessage && (
-        <div className="text-sm text-red-500 text-center font-medium">
+        <div 
+          aria-live="polite" 
+          className="text-sm text-red-500 text-center font-medium"
+        >
           {errorMessage}
         </div>
       )}
 
-      <Button className="w-full" type="submit">
-        Entrar
+      {/* Button with Loading State */}
+      <Button 
+        className="w-full" 
+        type="submit" 
+        disabled={isPending}
+      >
+        {isPending ? "Entrando..." : "Entrar"}
       </Button>
     </form>
   );

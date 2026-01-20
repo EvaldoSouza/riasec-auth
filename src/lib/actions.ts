@@ -1,58 +1,3 @@
-// // src/lib/actions.ts
-// import bcrypt from "bcryptjs";
-// import { Role } from "@prisma/client"; // Import the Role enum from Prisma
-// import { executeAction } from "./executeAction";
-// import { prisma } from "./prisma";
-// import { schema } from "./userSchema";
-
-// const signUp = async (formData: FormData) => {
-//   // The executeAction wrapper provides a final safety net.
-//   return executeAction({
-//     actionFn: async () => {
-//       const email = formData.get("email") as string;
-//       const password = formData.get("password") as string;
-      
-//       // 1. Validate with the stronger schema
-//       const validatedData = schema.parse({ email, password });
-      
-//       // 2. Check if user already exists
-//       const existingUser = await prisma.user.findUnique({
-//         where: { email: validatedData.email.toLocaleLowerCase() },
-//       });
-//       console.log("user findUnique: ",existingUser)
-
-      
-//       if (existingUser) {
-//         // Throw a specific error that can be handled if needed,
-//         // or just return a specific message.
-//         throw new Error("A user with this email already exists.");
-//       }
-      
-//       // 3. Hash the password
-//       const hashedPassword = await bcrypt.hash(validatedData.password, 10);
-//       console.log("hashed password: ",hashedPassword)
-
-//       // 4. Create the user with all required fields
-//       await prisma.user.create({
-//         data: {
-//           email: validatedData.email.toLocaleLowerCase(),
-//           password: hashedPassword,
-//           role: Role.CLIENTE, // Assign the default role
-//         },
-//       });
-
-//       const newUser = await prisma.user.findUnique({
-//         where: { email: validatedData.email.toLocaleLowerCase() },
-//       });
-
-//       console.log(newUser)
-//     },
-//     successMessage: "Account created successfully! Please sign in.",
-//   });
-// };
-
-// export { signUp };
-
 "use server";
 
 import bcrypt from "bcryptjs";
@@ -102,12 +47,12 @@ export async function signUp(formData: FormData): Promise<SignUpResult> {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       // 3. Check if the error code is for a unique constraint violation
       if (error.code === 'P2002') {
-        return { success: false, error: "A user with this email already exists." };
+        return { success: false, error: "Um usuário com esse email já existe." };
       }
     }
     
     // For any other type of error, return a generic message
     console.error("SIGN UP ERROR:", error);
-    return { success: false, error: "An unexpected error occurred. Please try again." };
+    return { success: false, error: "Um erro inesperado ocorreu. Por favor, tente mais tarde." };
   }
 }

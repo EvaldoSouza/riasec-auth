@@ -1,17 +1,20 @@
 "use client";
 
-import { useFormState } from "react-dom";
+import { useActionState } from "react"; // Changed from 'react-dom'
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { registerUser } from "./singupAction"; // Import the action from Step 1
+import { registerUser } from "./signupAction"; // Fixed typo 'singup' -> 'signup'
 
 export function SignUpForm() {
-  const [errorMessage, dispatch] = useFormState(registerUser, undefined);
+  // useActionState returns [state, action, isPending]
+  const [errorMessage, formAction, isPending] = useActionState(
+    registerUser,
+    undefined
+  );
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-center mb-6">Criar Conta</h1>
-
 
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
@@ -24,13 +27,14 @@ export function SignUpForm() {
         </div>
       </div>
 
-      <form action={dispatch} className="space-y-4">
+      <form action={formAction} className="space-y-4">
         <Input
           name="email"
           placeholder="Email"
           type="email"
           required
           autoComplete="email"
+          disabled={isPending} // Best Practice: Disable while loading
         />
         <Input
           name="password"
@@ -38,17 +42,21 @@ export function SignUpForm() {
           type="password"
           required
           autoComplete="new-password"
+          disabled={isPending} // Best Practice: Disable while loading
         />
 
-        {/* Display Error Message */}
+        {/* Accessibility Best Practice: aria-live ensures screen readers announce the error */}
         {errorMessage && (
-          <div className="text-sm text-red-500 text-center font-medium">
+          <div 
+            aria-live="polite" 
+            className="text-sm text-red-500 text-center font-medium"
+          >
             {errorMessage}
           </div>
         )}
 
-        <Button className="w-full" type="submit">
-          Cadastrar
+        <Button className="w-full" type="submit" disabled={isPending}>
+          {isPending ? "Cadastrando..." : "Cadastrar"}
         </Button>
       </form>
     </div>

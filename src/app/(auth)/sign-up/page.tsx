@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { SignUpForm } from "./singupForm"; // Import Client Component
+import { SignUpForm } from "./signupForm"; // Import Client Component
 
 const Page = async () => {
   const session = await auth();
