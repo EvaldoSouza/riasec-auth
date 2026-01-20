@@ -3,41 +3,77 @@ import { auth } from '@/lib/auth';
 import { getAllCompletedResults } from '@/services/resultServices';
 import { ResultsReport } from '@/components/dashboard/results/resultsReport';
 import { ResultsMatrix } from '@/components/dashboard/results/resultsMatrix';
-import { z } from 'zod';
-import { CalculatedRiasecResult } from '@/types/dashboard';
+import { ReportCard } from '@/components/dashboard/results/reportCard'; 
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, AlertCircle } from 'lucide-react';
+import { z } from 'zod';
 import { RiasecType } from '@prisma/client';
+import { CalculatedRiasecResult } from '@/types/dashboard';
 
-// 1. The Zod schema is moved back into this page file
+// --- VALIDATION HELPERS ---
 const scoresShape = Object.values(RiasecType).reduce((acc, type) => {
   acc[type] = z.number();
   return acc;
 }, {} as Record<RiasecType, z.ZodNumber>);
 const scoresSchema = z.object(scoresShape);
 
+// --- TRANSFORMER FUNCTION ---
+// Isolates complexity. Takes raw DB data -> Returns Clean UI Props or Null
+type ApplicationData = Awaited<ReturnType<typeof getAllCompletedResults>>[number];
 
-export default async function UserResultsPage({ params }: {params: Promise<{
-    userId: string;
-  }>;}) {
-  const session = await auth();
-  if (session?.user?.role !== 'APLICADOR') {
-    return redirect('/');
+function getSafeReportData(application: ApplicationData) {
+  if (!application.TestResult) return null;
+
+  const parsedScores = scoresSchema.safeParse(application.TestResult.scores);
+
+  if (!parsedScores.success) {
+    console.error(`[Data Error] App ID ${application.applicationId}:`, parsedScores.error);
+    return null;
   }
 
-  const userParams = await params;
-  const userApplications = await getAllCompletedResults(userParams.userId);
+  let username;
+  if(application.user.name === null){
+    username = "Não Informado";
+  }else{
+    username = application.user.name;
+  }
 
+  return {
+    id: application.applicationId,
+    title: application.application?.title || 'Teste Finalizado',
+    formattedDate: application.testFinishedAt?.toLocaleDateString('pt-BR') ?? 'N/A',
+    name: username,
+    email: application.user.email,
+    answers: application.answers,
+    finalResult: {
+      riasecCode: application.TestResult.riasecCode,
+      scores: parsedScores.data,
+    } as CalculatedRiasecResult
+  };
+}
+
+// --- MAIN PAGE ---
+export default async function UserResultsPage({ params }: { params: Promise<{ userId: string }> }) {
+  const session = await auth();
+  if (session?.user?.role !== 'APLICADOR') return redirect('/');
+
+  const { userId } = await params;
+  const userApplications = await getAllCompletedResults(userId);
+
+  // Handle completely empty user history
   if (!userApplications || userApplications.length === 0) {
     return (
-      <div className="text-center">
-        <h1 className="text-2xl font-bold">Nenhum resultado encontrado</h1>
-        <p className="text-muted-foreground mt-2">
-          Este usuário ainda não completou nenhum teste.
-        </p>
-        <Button asChild variant="outline" size="sm" className="mt-4">
-          <Link href="/admin/users"><ChevronLeft className="mr-2 h-4 w-4" /> Voltar para Usuários</Link>
+      <div className="flex flex-col items-center justify-center h-64 text-center space-y-4">
+        <div className="p-4 bg-muted rounded-full">
+          <AlertCircle className="h-8 w-8 text-muted-foreground" />
+        </div>
+        <div>
+          <h1 className="text-xl font-bold">Nenhum resultado encontrado</h1>
+          <p className="text-muted-foreground">Este usuário ainda não completou nenhum teste.</p>
+        </div>
+        <Button asChild variant="outline">
+          <Link href="/admin/users">Voltar para Usuários</Link>
         </Button>
       </div>
     );
@@ -45,52 +81,58 @@ export default async function UserResultsPage({ params }: {params: Promise<{
 
   const userInfo = userApplications[0]?.user;
 
+  // Transform data securely
+  const validReports = userApplications
+    .map(getSafeReportData)
+    .filter((r): r is NonNullable<typeof r> => r !== null);
+
   return (
-    <div className="w-full space-y-8">
-      <Button asChild variant="outline" size="sm">
-        <Link href="/admin/users"><ChevronLeft className="mr-2 h-4 w-4" /> Voltar para Usuários</Link>
-      </Button>
-      
-      <h1 className="text-2xl font-bold">
-        Histórico de Testes para: <span className="text-primary">{userInfo?.name || userInfo?.email}</span>
-      </h1>
+    <div className="w-full max-w-5xl mx-auto space-y-8 pb-12">
+      {/* Navigation & Title */}
+      <div className="space-y-4">
+        <Button asChild variant="ghost" size="sm" className="-ml-2 text-muted-foreground hover:text-primary">
+          <Link href="/admin/users"><ChevronLeft className="mr-2 h-4 w-4" /> Voltar para lista de usuários</Link>
+        </Button>
+        
+        <div className="border-b pb-4">
+          <h1 className="text-3xl font-bold tracking-tight">Histórico de Avaliações</h1>
+          <p className="text-muted-foreground mt-1">
+            Candidato: <span className="font-medium text-foreground">{userInfo?.name || userInfo?.email}</span>
+          </p>
+        </div>
+      </div>
 
-      {/* 2. The map loop now contains all the detailed rendering logic */}
-      <div className="space-y-6">
-        {userApplications.map((application) => {
-          if (!application.TestResult) return null;
-
-          const parsedScores = scoresSchema.safeParse(application.TestResult.scores);
-          if (!parsedScores.success) {
-            return <div key={application.applicationId}>Erro ao carregar os dados de pontuação para este teste.</div>;
-          }
-
-          const finalResult: CalculatedRiasecResult = {
-            riasecCode: application.TestResult.riasecCode,
-            scores: parsedScores.data,
-          };
-
-          return (
-            <div key={application.applicationId} className="p-6 border rounded-xl shadow-md space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">{application.application?.title || 'Teste Finalizado'}</h2>
-                <p className="text-sm text-muted-foreground">
-                  Finalizado em: {application.testFinishedAt?.toLocaleDateString('pt-BR')}
-                </p>
+      {/* Reports Grid */}
+      <div className="grid gap-8">
+        {validReports.length > 0 ? (
+          validReports.map((report) => (
+            <ReportCard 
+              key={report.id}
+              title={report.title}
+              date={report.formattedDate}
+              name = {report.name}
+              email = {report.email}
+            >
+              <div className="space-y-10">
+                {/* Result Chart */}
+                <section>
+                  <ResultsReport result={report.finalResult} />
+                </section>
+                
+                {/* Detailed Answers Matrix */}
+                {/* 'break-inside-avoid' prevents the matrix from being split across PDF pages awkwardly */}
+                <section className="break-inside-avoid pt-4 border-t">
+                  <h3 className="text-lg font-bold mb-6">Matriz de Respostas</h3>
+                  <ResultsMatrix answers={report.answers} />
+                </section>
               </div>
-              
-              {/* The summary report, chart, and matrix are now rendered directly */}
-              <div >
-                <ResultsReport result={finalResult} />
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-bold mb-4">Respostas Detalhadas</h3>
-                <ResultsMatrix answers={application.answers} />
-              </div>
-            </div>
-          );
-        })}
+            </ReportCard>
+          ))
+        ) : (
+          <div className="p-6 border border-yellow-200 bg-yellow-50 rounded-lg text-yellow-900">
+            Atenção: Existem registros no banco de dados, mas eles estão incompletos e não puderam ser exibidos.
+          </div>
+        )}
       </div>
     </div>
   );
