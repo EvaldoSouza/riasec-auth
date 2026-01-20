@@ -14,7 +14,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   basePath: `${basePath}/api/auth`,
   adapter: PrismaAdapter(prisma),
   // 2. Explicitly set the session strategy to "jwt". This is crucial for middleware.
-  session: { strategy: "jwt" },
+  session: { strategy: "jwt", maxAge: 5*60*60 }, //5 horas de vida para o token
   providers: [
     Github,
     Credentials({
@@ -32,6 +32,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           if (!user || !user.password) {
             // If the user doesn't exist or signed up with an OAuth provider, fail login.
             return null;
+          }
+
+          if (!user.isActive) {
+            throw new Error("Sua conta está desativada. Entre em contato com o suporte.");
           }
 
           const passwordsMatch = await bcrypt.compare(

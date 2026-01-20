@@ -2,43 +2,12 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { UserWithApplicationCount } from "@/services/userServices";
-import { MoreHorizontal, ArrowUpDown } from "lucide-react";
+import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import Link from "next/link";
-
-/**
- * Renders the "three dots" action menu for each user row.
- */
-function DataTableRowActions({ user }: { user: UserWithApplicationCount }) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 p-0">
-          <span className="sr-only">Open menu</span>
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Ações</DropdownMenuLabel>
-         <DropdownMenuItem asChild>
-          <Link href={`/admin/users/${user.id}/results`}>Ver Resultados do Teste</Link>
-        </DropdownMenuItem>
-        {/* We can add more actions like 'Change Role' or 'Deactivate' here in the future */}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
+import { UserRowActions } from "./userRowActions"; // Import our new component
 
 export const columns: ColumnDef<UserWithApplicationCount>[] = [
-  // Column for the user's name, with sorting
   {
     accessorKey: "name",
     header: ({ column }) => (
@@ -47,48 +16,58 @@ export const columns: ColumnDef<UserWithApplicationCount>[] = [
       </Button>
     ),
   },
-  // Column for the user's email
   {
     accessorKey: "email",
     header: "Email",
   },
-  // Column for the user's role, displayed as a badge
   {
     accessorKey: "role",
-    header: "Role",
+    header: "Permissão",
     cell: ({ row }) => {
       const role = row.getValue("role") as string;
-      const variant = role === 'APLICADOR' ? 'default' : 'secondary';
-      return <Badge variant={variant}>{role}</Badge>;
+      // Visual feedback for Admins vs Users
+      return (
+        <Badge variant={role === 'APLICADOR' ? 'default' : 'secondary'}>
+          {role === 'APLICADOR' ? 'Admin' : 'Cliente'}
+        </Badge>
+      );
     },
   },
-  // A computed column to show the number of completed tests
+  {
+    accessorKey: "isActive", // Optional: Visual indicator if they are active
+    header: "Status",
+    cell: ({ row }) => {
+      const isActive = row.original.isActive;
+      return (
+        <div className={`flex items-center gap-2 ${isActive ? 'text-green-600' : 'text-red-500'}`}>
+           <span className={`h-2 w-2 rounded-full ${isActive ? 'bg-green-500' : 'bg-red-500'}`} />
+           <span className="text-xs font-medium">{isActive ? 'Ativo' : 'Inativo'}</span>
+        </div>
+      );
+    }
+  },
   {
     id: "completedTests",
-    header: "Testes Concluídos",
+    header: "Testes",
     accessorFn: (row) => row._count.applications,
-    cell: ({ row }) => {
-      return <div className="text-center">{row.original._count.applications}</div>;
-    },
+    cell: ({ row }) => (
+      <div className="text-center font-mono">{row.original._count.applications}</div>
+    ),
   },
-  // Column for the user's registration date, with formatting and sorting
   {
     accessorKey: "createdAt",
     header: ({ column }) => (
       <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-        Registrado Em <ArrowUpDown className="ml-2 h-4 w-4" />
+        Data Registro <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => {
       const date = row.getValue<Date>("createdAt");
-      return <div className="font-medium">{new Date(date).toLocaleDateString('pt-BR')}</div>;
+      return <div className="text-muted-foreground">{new Date(date).toLocaleDateString('pt-BR')}</div>;
     },
   },
-  // The column for row-specific actions
   {
     id: "actions",
-    cell: ({ row }) => {
-      return <DataTableRowActions user={row.original} />;
-    },
+    cell: ({ row }) => <UserRowActions user={row.original} />,
   },
 ];

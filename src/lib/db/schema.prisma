@@ -43,6 +43,7 @@ model User {
   dateOfBirth   DateTime? @map("date_of_birth")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  isActive      Boolean   @default(true)
 
   // Relations
   accounts     Account[]
