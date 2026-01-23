@@ -45,6 +45,7 @@ export async function toggleUserStatus(userId: string, currentStatus: boolean) {
       message: !currentStatus ? 'Usuário reativado.' : 'Usuário desativado.' 
     };
   } catch (error) {
+    console.log(error)
     return { success: false, message: 'Erro ao alterar status.' };
   }
 }

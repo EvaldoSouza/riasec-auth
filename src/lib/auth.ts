@@ -5,14 +5,14 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import { schema } from "./userSchema";
 import bcrypt from "bcryptjs";
-// 1. Import the Role enum from your generated Prisma Client
 import { Role } from "@prisma/client";
+import type { Adapter } from "next-auth/adapters";
 
 const basePath = process.env.BASE_PATH ?? ''
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   basePath: `${basePath}/api/auth`,
-  adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(prisma) as Adapter,
   // 2. Explicitly set the session strategy to "jwt". This is crucial for middleware.
   session: { strategy: "jwt", maxAge: 5*60*60 }, //5 horas de vida para o token
   providers: [
